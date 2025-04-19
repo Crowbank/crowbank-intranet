@@ -1,0 +1,50 @@
+# Crowbank Intranet AI Instructions (Cursor Rules)
+
+[Project Purpose]
+Crowbank Intranet is an internal Flask-based system for Crowbank Kennels & Cattery. It manages pet boarding, staff scheduling, booking management, and customer communication. It is replacing the legacy MSSQL and PetAdmin systems, with a modular, cloud-ready architecture.
+
+[Tech Stack]
+- Python 3.11+, Flask 3.x, SQLAlchemy 2.x, Alembic
+- Tailwind CSS, HTMX, Alpine.js, Jinja2
+- PostgreSQL Database
+- Cloudflare R2 (S3-compatible) for file storage
+- Flask-Mail, Jinja2 templates for Email
+- Reports generated using Word MailMerge (docx-mailmerge)
+
+[Project Structure]
+app/
+├── models/          (SQLAlchemy models)
+├── services/        (Business logic)
+├── routes/          (Flask Blueprints/views)
+├── templates/       (HTML, email, print templates)
+├── utils/           (Utilities - logging, file storage, security)
+├── integrations/    (Stripe, Gravity Forms, AI)
+├── tasks/           (APScheduler tasks)
+tests/               (pytest)
+migrations/          (Alembic)
+static/              (Tailwind, HTMX, Alpine.js frontend)
+
+[Naming Conventions]
+- Tables: tblsingular (e.g., tblbooking)
+- Primary Keys: integer named table_no (e.g., booking_no)
+- Foreign Keys: explicit naming (e.g., pet_owner_no)
+- Variables/functions: snake_case
+- Classes: PascalCase
+
+[Code and Structure]
+- Keep Flask routes thin and minimal.
+- Centralize business logic clearly in services/.
+- Use comprehensive type hints and enforce via mypy.
+- Prefer minimal frontend JavaScript; use HTMX/Alpine.js interactions.
+- Always follow Python best practices (PEP8).
+
+[AI Response Preferences]
+- Concise, practical answers.
+- Provide specific, practical code snippets.
+- Always clarify explicitly if unsure about project logic or schema.
+- No assumptions—always ask if unclear.
+
+[Constraints]
+- Internal use project, not open source.
+- Prioritize security, maintainability, clarity.
+- Clarify explicitly instead of guessing.
