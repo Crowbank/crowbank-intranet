@@ -2,27 +2,60 @@ version: '3.8'
 
 services:
   crowbank-postgres:
-    image: postgres:latest
+    image: postgres:15-alpine
     container_name: crowbank-postgres
-    restart: always
+    restart: unless-stopped
     environment:
-      POSTGRES_PASSWORD: yourpassword
+      POSTGRES_DB: crowbank
+      POSTGRES_USER: crowbank
+      POSTGRES_PASSWORD: ZhV8Pk521j1Z
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U crowbank"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   pgadmin:
-    image: dpage/pgadmin4
+    image: dpage/pgadmin4:latest
     container_name: crowbank-pgadmin
-    restart: always
+    restart: unless-stopped
     environment:
-      PGADMIN_DEFAULT_EMAIL: "admin@example.com"
-      PGADMIN_DEFAULT_PASSWORD: "securepassword"
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@crowbank.co.uk}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-changeme}
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
     ports:
       - "8080:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
     depends_on:
-      - crowbank-postgres
+      crowbank-postgres:
+        condition: service_healthy
+
+  redis:
+    image: redis:alpine
+    container_name: crowbank-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   pgdata:
+    name: crowbank_pgdata
+  pgadmin_data:
+    name: crowbank_pgadmin
+  redis_data:
+    name: crowbank_redis
