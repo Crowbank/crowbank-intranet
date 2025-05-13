@@ -23,6 +23,23 @@ files:
     - xlsx
   max_content_length: 16777216  # 16 MB
 
+# Cloud storage configuration
+storage:
+  # Default buckets as fallback
+  default_document_bucket: "crowbank-documents"
+  default_media_bucket: "crowbank-media"
+  
+  # Environment-specific buckets
+  buckets:
+    pet_documents:
+      dev: "crowbank-pet-documents-dev"
+      test: "crowbank-pet-documents-test"
+      prod: "crowbank-pet-documents-prod"
+    media:
+      dev: "crowbank-media-dev"
+      test: "crowbank-media-test"
+      prod: "crowbank-media-prod"
+
 # Session settings
 session:
   permanent_lifetime: 86400  # 24 hours in seconds
