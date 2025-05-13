@@ -148,6 +148,7 @@ For more details, see the [Configuration Management](docs/configuration_manageme
 - **Type-checked**: Comprehensive use of Python type hints and mypy.
 - **Tested**: Unit and integration tests using pytest.
 - **Modular**: Clear boundaries between routes, services, and data layers.
+- **Git Workflow**: Structured branching strategy with automated sync tools (see [Git Policy](docs/git-policy.md)).
 
 ---
 
