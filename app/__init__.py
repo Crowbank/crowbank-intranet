@@ -6,7 +6,7 @@ import os
 from datetime import datetime
 from flask import Flask, render_template
 
-from app.utils.config_loader import load_config
+from app.utils.yaml_config import load_config
 from app.extensions import db, migrate
 
 
@@ -26,9 +26,14 @@ def create_app(test_config=None):
                 template_folder='templates',
                 static_folder='static')
     
-    # Load configuration
+    # Load configuration from YAML files
     config = load_config()
-    app.config.from_mapping(config)
+    
+    # Apply the flattened config to Flask
+    app.config.from_mapping(config['flat'])
+    
+    # Make nested config available as well
+    app.config['CONFIG'] = config['nested']
     
     # Override with test config if provided
     if test_config:

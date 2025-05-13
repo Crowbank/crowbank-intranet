@@ -1,0 +1,35 @@
+# Production environment configuration for Crowbank Intranet
+
+# Flask settings
+flask:
+  debug: false
+  testing: false
+
+# Session security settings
+session:
+  cookie_secure: true
+  cookie_httponly: true
+  remember_cookie_secure: true
+  remember_cookie_httponly: true
+
+# SQLAlchemy settings
+sqlalchemy:
+  echo: false
+  track_modifications: false
+  engine_options:
+    pool_size: 10
+    pool_recycle: 3600
+    pool_pre_ping: true
+
+# Caching
+cache:
+  type: "SimpleCache"
+  default_timeout: 300
+
+# Logging
+logging:
+  level: "ERROR"
+
+# Email error reporting (email addresses should be in secret.yaml)
+email:
+  error_reporting_enabled: true 

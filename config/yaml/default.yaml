@@ -1,0 +1,46 @@
+# Default configuration settings for Crowbank Intranet
+# These settings apply to all environments unless overridden
+
+# Application settings
+app:
+  name: "Crowbank Intranet"
+  version: "0.1.0"
+
+# UI settings
+ui:
+  items_per_page: 20
+  max_search_results: 100
+
+# File handling
+files:
+  upload_folder: "uploads"
+  allowed_extensions:
+    - pdf
+    - png
+    - jpg
+    - jpeg
+    - docx
+    - xlsx
+  max_content_length: 16777216  # 16 MB
+
+# Session settings
+session:
+  permanent_lifetime: 86400  # 24 hours in seconds
+  type: "filesystem"
+
+# Email settings (non-sensitive defaults)
+email:
+  server: "smtp.example.com"
+  port: 587
+  use_tls: true
+  use_ssl: false
+  default_sender: "intranet@crowbank.co.uk"
+
+# Logging
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+# SQLAlchemy
+sqlalchemy:
+  track_modifications: false 

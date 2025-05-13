@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 
-{% block title %}Crowbank Intranet - Dashboard{% endblock %}
+{% block title %}{{ config.CONFIG.app.name }} - Dashboard{% endblock %}
 
 {% block content %}
 <div class="bg-white shadow rounded-lg p-6">
-    <h1 class="text-2xl font-bold text-gray-800 mb-4">Welcome to Crowbank Intranet</h1>
+    <h1 class="text-2xl font-bold text-gray-800 mb-4">Welcome to {{ config.CONFIG.app.name }}</h1>
     
     <div class="text-gray-600 mb-6">
         <p>This is the internal management system for Crowbank Kennels &amp; Cattery.</p>
-        <p class="mt-2">Environment: <span class="font-semibold">{{ config['ENV'] }}</span></p>
+        <p class="mt-2">Environment: <span class="font-semibold">{{ config.CONFIG.env }}</span></p>
     </div>
     
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
@@ -50,10 +50,11 @@
         <div class="bg-purple-50 rounded-lg p-4 shadow-sm">
             <h2 class="text-lg font-semibold text-purple-800 mb-3">Application Info</h2>
             <ul class="text-gray-700 space-y-2">
-                <li><strong>Version:</strong> {{ config['APP_VERSION'] }}</li>
-                <li><strong>Environment:</strong> {{ config['ENV'] }}</li>
+                <li><strong>Version:</strong> {{ config.CONFIG.app.version }}</li>
+                <li><strong>Environment:</strong> {{ config.CONFIG.env }}</li>
                 <li><strong>Database:</strong> PostgreSQL</li>
                 <li><strong>Server Time:</strong> {{ now.strftime('%Y-%m-%d %H:%M:%S') }}</li>
+                <li><strong>Items Per Page:</strong> {{ config.CONFIG.ui.items_per_page }}</li>
             </ul>
         </div>
     </div>

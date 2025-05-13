@@ -1,0 +1,28 @@
+# Development environment configuration for Crowbank Intranet
+
+# Flask settings
+flask:
+  debug: true
+  testing: false
+
+# Database settings (credentials should be in secret.yaml)
+database:
+  host: "localhost"
+  port: 5432
+  name: "crowbank"
+
+# SQLAlchemy settings
+sqlalchemy:
+  echo: true  # Log SQL queries
+  track_modifications: true
+
+# Logging
+logging:
+  level: "DEBUG"
+
+# Development-specific settings
+development:
+  send_file_max_age: 0  # Disable caching for static files
+  templates_auto_reload: true
+  debug_toolbar_enabled: true
+  debug_toolbar_intercept_redirects: false 
