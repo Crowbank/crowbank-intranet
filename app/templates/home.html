@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Crowbank Intranet - Dashboard{% endblock %}
+
+{% block content %}
+<div class="bg-white shadow rounded-lg p-6">
+    <h1 class="text-2xl font-bold text-gray-800 mb-4">Welcome to Crowbank Intranet</h1>
+    
+    <div class="text-gray-600 mb-6">
+        <p>This is the internal management system for Crowbank Kennels &amp; Cattery.</p>
+        <p class="mt-2">Environment: <span class="font-semibold">{{ config['ENV'] }}</span></p>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+        <!-- Quick Links Card -->
+        <div class="bg-blue-50 rounded-lg p-4 shadow-sm">
+            <h2 class="text-lg font-semibold text-blue-800 mb-3">Quick Links</h2>
+            <ul class="space-y-2">
+                <li><a href="#" class="text-blue-600 hover:underline">New Booking</a></li>
+                <li><a href="#" class="text-blue-600 hover:underline">Customer Search</a></li>
+                <li><a href="#" class="text-blue-600 hover:underline">Today's Arrivals</a></li>
+                <li><a href="#" class="text-blue-600 hover:underline">Today's Departures</a></li>
+                <li><a href="#" class="text-blue-600 hover:underline">Staff Schedule</a></li>
+            </ul>
+        </div>
+        
+        <!-- Recent Activity Card -->
+        <div class="bg-green-50 rounded-lg p-4 shadow-sm">
+            <h2 class="text-lg font-semibold text-green-800 mb-3">System Status</h2>
+            <ul class="space-y-2">
+                <li class="flex items-center">
+                    <span class="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
+                    <span>Database: Connected</span>
+                </li>
+                <li class="flex items-center">
+                    <span class="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
+                    <span>File Storage: Available</span>
+                </li>
+                <li class="flex items-center">
+                    <span class="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
+                    <span>Email Service: Ready</span>
+                </li>
+                <li class="text-sm text-gray-600 mt-4">
+                    Last checked: {{ now.strftime('%Y-%m-%d %H:%M:%S') }}
+                </li>
+            </ul>
+        </div>
+        
+        <!-- System Info Card -->
+        <div class="bg-purple-50 rounded-lg p-4 shadow-sm">
+            <h2 class="text-lg font-semibold text-purple-800 mb-3">Application Info</h2>
+            <ul class="text-gray-700 space-y-2">
+                <li><strong>Version:</strong> {{ config['APP_VERSION'] }}</li>
+                <li><strong>Environment:</strong> {{ config['ENV'] }}</li>
+                <li><strong>Database:</strong> PostgreSQL</li>
+                <li><strong>Server Time:</strong> {{ now.strftime('%Y-%m-%d %H:%M:%S') }}</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %} 

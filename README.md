@@ -37,11 +37,12 @@ crowbank-intranet/
 │   ├── utils/           # Common utilities (logging, file storage, security)
 │   ├── integrations/    # Third-party services (Stripe, Gravity Forms, AI)
 │   └── tasks/           # Background/scheduled tasks
+├── config/              # Configuration files for different environments
 ├── tests/               # Unit and integration tests
 ├── migrations/          # Alembic migrations
 ├── static/              # CSS (Tailwind), JS (HTMX/Alpine)
-├── .env                 # Environment configuration
-└── Dockerfile           # Docker build config
+├── .env                 # Environment configuration (not in git)
+└── run.py               # Application runner script
 ```
 
 ---
@@ -65,19 +66,69 @@ pip install -r requirements.txt
 
 ### 3. Configure your environment
 
-Create a `.env` file:
+Copy `.env.example` to `.env` and adjust values:
 
-```env
-FLASK_ENV=development
-DATABASE_URL=postgresql://localhost/crowbank_dev
-SECRET_KEY=your-secret-key
+```bash
+cp .env.example .env
+# Edit .env with your configuration
 ```
+
+Key settings to configure:
+- `FLASK_ENV`: Use `dev` for development, `test` for testing, or `prod` for production
+- `DB_USER`, `DB_PASSWORD`, `DB_HOST`, etc.: Database connection details
+- `SECRET_KEY`: Generate a secure key for Flask sessions
 
 ### 4. Run the development server
 
 ```bash
-flask run
+# Basic run
+python run.py
+
+# With specific environment
+python run.py --env dev
+
+# With specific host/port
+python run.py --host 127.0.0.1 --port 8000
+
+# With debug mode
+python run.py --debug
 ```
+
+---
+
+## ⚙️ Configuration System
+
+The application uses a centralized configuration system with environment-specific settings:
+
+- **Base Settings**: `config/default.py` contains common settings for all environments
+- **Environment-Specific**: `config/dev.py`, `config/test.py`, and `config/prod.py` contain environment-specific overrides
+- **Secrets**: Sensitive data is loaded from environment variables or `.env` file
+
+### Using Configuration in Code
+
+#### Within Flask Routes/Views:
+```python
+from flask import current_app
+
+# Access config values
+db_url = current_app.config["SQLALCHEMY_DATABASE_URI"]
+page_size = current_app.config["ITEMS_PER_PAGE"]
+```
+
+#### In Standalone Scripts:
+```python
+from app.utils.config_loader import load_config
+
+# Load config
+config = load_config()
+db_url = config["SQLALCHEMY_DATABASE_URI"]
+
+# Or get a single value
+from app.utils.config_loader import get_config_value
+page_size = get_config_value("ITEMS_PER_PAGE", default=20)
+```
+
+For more details, see the [Configuration Management](docs/configuration_management.md) documentation.
 
 ---
 

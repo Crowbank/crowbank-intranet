@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Crowbank Intranet{% endblock %}</title>
+    
+    <!-- Tailwind CSS (will be replaced with bundled version later) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- HTMX for interactive UI -->
+    <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+    
+    <!-- Alpine.js for client-side interactions -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- Custom styles -->
+    {% block styles %}{% endblock %}
+</head>
+<body class="min-h-screen bg-gray-50">
+    <!-- Header -->
+    <header class="bg-blue-700 text-white shadow-md">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center">
+                <div class="mr-4 font-bold text-xl">🐾 Crowbank</div>
+                <nav class="hidden md:flex space-x-4">
+                    <a href="/" class="hover:underline">Dashboard</a>
+                    <a href="#" class="hover:underline">Bookings</a>
+                    <a href="#" class="hover:underline">Customers</a>
+                    <a href="#" class="hover:underline">Pets</a>
+                    <a href="#" class="hover:underline">Staff</a>
+                    <a href="#" class="hover:underline">Reports</a>
+                </nav>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span>Environment: {{ config['ENV'] }}</span>
+                <a href="#" class="ml-4 p-2 hover:bg-blue-600 rounded">Logout</a>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main content -->
+    <main class="container mx-auto px-4 py-8">
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-gray-200 py-4 mt-8">
+        <div class="container mx-auto px-4 text-center text-gray-600">
+            <p>Crowbank Intranet &copy; {{ now.year }} - {{ config['APP_VERSION'] }}</p>
+        </div>
+    </footer>
+    
+    <!-- JavaScript -->
+    {% block scripts %}{% endblock %}
+</body>
+</html> 

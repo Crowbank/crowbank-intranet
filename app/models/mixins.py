@@ -1,39 +1,91 @@
+"""
+Model mixins for Crowbank Intranet.
+
+This module contains SQLAlchemy model mixins that can be reused across models.
+"""
+
 from typing import Optional
-from sqlalchemy import String
-from sqlalchemy.orm import Mapped, mapped_column
-from urllib.parse import quote
+from sqlalchemy import Column, String
+
 
 class AddressMixin:
-    """Mixin for models that have address fields."""
+    """
+    Mixin for models that contain address information.
     
-    street: Mapped[Optional[str]] = mapped_column(String(255))
-    town: Mapped[Optional[str]] = mapped_column(String(100))
-    postcode: Mapped[Optional[str]] = mapped_column(String(20))
-
-    @property
-    def has_full_address(self) -> bool:
-        """Check if all address fields are populated."""
-        return all([self.street, self.town, self.postcode])
+    This can be used by Customer, Vet, and other models that need address fields.
+    """
     
-    @property
-    def full_address(self) -> Optional[str]:
-        """Get formatted full address string."""
-        if not self.has_full_address:
-            return None
-        return f"{self.street}, {self.town} {self.postcode}"
+    street = Column(String(100), nullable=True)
+    town = Column(String(50), nullable=True)
+    county = Column(String(50), nullable=True)
+    postcode = Column(String(10), nullable=True)
     
-    def get_maps_url(self, maps_type: str = "search") -> Optional[str]:
-        """Generate Google Maps URL for the address.
-        
-        Args:
-            maps_type: Either 'search' or 'directions'
+    def get_full_address(self) -> str:
         """
-        if not self.has_full_address:
-            return None
-            
-        base_url = "https://www.google.com/maps"
-        encoded_address = quote(f"{self.street}, {self.town}, {self.postcode}, UK")
+        Get the full address as a formatted string.
         
-        if maps_type == "directions":
-            return f"{base_url}/dir/?api=1&destination={encoded_address}"
-        return f"{base_url}/search/?api=1&query={encoded_address}" 
+        Returns:
+            Formatted address string
+        """
+        parts = []
+        if self.street:
+            parts.append(self.street)
+        if self.town:
+            parts.append(self.town)
+        if self.county:
+            parts.append(self.county)
+        if self.postcode:
+            parts.append(self.postcode)
+        
+        return ", ".join(parts)
+    
+    def get_navigation_url(self) -> Optional[str]:
+        """
+        Get a URL for navigation to this address.
+        
+        Returns:
+            Google Maps URL for the address or None if no postcode
+        """
+        if not self.postcode:
+            return None
+        
+        # Create a Google Maps URL with the postcode
+        # Optionally include additional address components
+        address_parts = []
+        if self.street:
+            address_parts.append(self.street.replace(" ", "+"))
+        if self.town:
+            address_parts.append(self.town.replace(" ", "+"))
+        if self.county:
+            address_parts.append(self.county.replace(" ", "+"))
+        address_parts.append(self.postcode.replace(" ", "+"))
+        
+        address_str = ",".join(address_parts)
+        return f"https://www.google.com/maps/search/?api=1&query={address_str}"
+
+
+class ContactDetailsMixin:
+    """
+    Mixin for models that contain contact information.
+    
+    This can be used by Customer, Vet, Contact, and other models that need contact fields.
+    """
+    
+    phone = Column(String(20), nullable=True)
+    mobile = Column(String(20), nullable=True)
+    email = Column(String(100), nullable=True)
+    
+    def get_primary_contact(self) -> Optional[str]:
+        """
+        Get the primary contact method.
+        
+        Returns:
+            The first available contact method in order: mobile, phone, email
+        """
+        if self.mobile:
+            return self.mobile
+        if self.phone:
+            return self.phone
+        if self.email:
+            return self.email
+        return None 
