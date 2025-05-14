@@ -1,0 +1,32 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+Git Workflow Policy
+Branch Structure:
+main: Production-ready code
+dev: Integration branch for development
+Feature branches: Isolated work on specific features (feature/feature-name)
+Hotfix branches: Emergency fixes (hotfix/issue-name)
+Commits:
+Make small, focused commits with clear messages
+Use descriptive commit messages in present tense
+Format: [Component]: Brief description of changes
+Feature Development:
+Create feature branches from dev
+Commit frequently with atomic changes
+Rebase with dev before pull requests
+Merge back to dev when complete
+Code Review:
+Create pull requests for feature completion
+Require code review before merging
+Use squash merging for cleaner history
+Releases:
+Merge dev to main for releases
+Tag releases with semantic versioning
+I'll prompt you at the right moments to:
+Commit changes when a logical unit of work is complete
+Create new branches when starting new features
+Merge completed features back to dev
+Rebase when needed to keep history clean
