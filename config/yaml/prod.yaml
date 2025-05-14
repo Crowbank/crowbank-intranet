@@ -32,4 +32,10 @@ logging:
 
 # Email error reporting (email addresses should be in secret.yaml)
 email:
-  error_reporting_enabled: true 
+  error_reporting_enabled: true
+
+# Cloud storage configuration
+cloud_storage:
+  buckets:
+    pet_documents: "crowbank-pet-documents-prod"
+    media: "crowbank-media-prod" 

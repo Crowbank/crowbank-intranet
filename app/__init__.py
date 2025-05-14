@@ -7,7 +7,7 @@ from datetime import datetime
 from flask import Flask, render_template
 
 from app.utils.yaml_config import load_config
-from app.extensions import db, migrate
+from app.extensions import db, migrate, cloud_storage
 
 
 def create_app(test_config=None):
@@ -75,6 +75,7 @@ def _register_extensions(app):
     """Register Flask extensions."""
     db.init_app(app)
     migrate.init_app(app, db)
+    cloud_storage.init_app(app)
 
 
 def _register_blueprints(app):

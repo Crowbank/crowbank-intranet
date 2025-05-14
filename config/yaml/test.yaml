@@ -1,13 +1,13 @@
-# Testing environment configuration for Crowbank Intranet
+# Test environment configuration for Crowbank Intranet
 
 # Flask settings
 flask:
-  debug: true
+  debug: false
   testing: true
   server_name: "localhost"
   preserve_context_on_exception: false
 
-# Database settings (credentials should be in secret.yaml)
+# Database settings (test database)
 database:
   host: "localhost"
   port: 5432
@@ -18,6 +18,10 @@ sqlalchemy:
   echo: false  # Don't log SQL queries in tests
   track_modifications: false
 
+# Logging
+logging:
+  level: "WARNING"
+
 # Testing settings
 testing:
   wtf_csrf_enabled: false  # Disable CSRF protection in tests
@@ -26,4 +30,10 @@ testing:
   
   # Make tests faster
   bcrypt_log_rounds: 4  # Lower encryption rounds for faster tests
-  password_hash_method: "plain"  # Use plaintext passwords for tests 
+  password_hash_method: "plain"  # Use plaintext passwords for tests
+
+# Cloud storage configuration
+cloud_storage:
+  buckets:
+    pet_documents: "crowbank-pet-documents-test"
+    media: "crowbank-media-test" 

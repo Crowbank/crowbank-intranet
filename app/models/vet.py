@@ -19,7 +19,9 @@ class Vet(Base, AddressMixin):
 
     # Relationship back to Customers who have this vet as default (optional)
     customers = relationship("Customer", back_populates="default_vet")
-    pets = relationship("Pet", back_populates="vet")
+    
+    # Relationship to pets that use this vet
+    pets = relationship("Pet", back_populates="default_vet")
 
     def __repr__(self):
         return f"<Vet(id={self.id}, practice_name='{self.practice_name}')>" 

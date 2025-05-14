@@ -56,3 +56,14 @@ cloud_storage:
   provider: cloudflare_r2
   region: auto
 
+# Dev-specific cloud storage configuration
+cloud_storage:
+  buckets:
+    pet_documents: "crowbank-pet-docs-dev"
+    media: "crowbank-media-dev"
+
+# Prod-specific cloud storage configuration
+cloud_storage:
+  buckets:
+    pet_documents: "crowbank-pet-docs-prod"
+    media: "crowbank-media-prod" 

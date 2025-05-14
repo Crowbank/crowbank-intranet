@@ -13,6 +13,9 @@ db = SQLAlchemy()
 from flask_migrate import Migrate
 migrate = Migrate()
 
+# Cloud Storage
+from app.utils.cloud_storage import cloud_storage
+
 # Blueprints and extension instances will be added as needed:
 # from flask_login import LoginManager
 # login_manager = LoginManager()

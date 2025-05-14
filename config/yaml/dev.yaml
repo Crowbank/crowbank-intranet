@@ -25,4 +25,18 @@ development:
   send_file_max_age: 0  # Disable caching for static files
   templates_auto_reload: true
   debug_toolbar_enabled: true
-  debug_toolbar_intercept_redirects: false 
+  debug_toolbar_intercept_redirects: false
+
+# Cloud storage configuration
+cloud_storage:
+  buckets:
+    pet_documents: "crowbank-pet-documents-dev"
+    media: "crowbank-media-dev"
+  url_expiration: 3600  # Seconds for presigned URLs to remain valid
+  default_acl: "private"  # Default access control for uploaded files
+  max_retries: 3
+  connect_timeout: 5  # seconds
+  read_timeout: 30  # seconds
+  endpoint: "https://4c5e823c2366476787d1b49d50d5d0a4.r2.cloudflarestorage.com"
+  region: "auto"  # Already present
+  public_url: "https://crowbank-media-dev.s3.us-east-1.amazonaws.com"  # Optional CDN/public URL if configured 
