@@ -6,12 +6,12 @@ from sqlalchemy.orm import relationship
 from .base import Base
 
 # Association table for booking to pets (many-to-many)
-booking_pets = Table(
-    'booking_pets',
-    Base.metadata,
-    Column('booking_id', Integer, ForeignKey('bookings.id'), primary_key=True),
-    Column('pet_id', Integer, ForeignKey('pets.id'), primary_key=True)
-)
+# booking_pets = Table(
+#     'booking_pets',
+#     Base.metadata,
+#     Column('booking_id', Integer, ForeignKey('bookings.id'), primary_key=True),
+#     Column('pet_id', Integer, ForeignKey('pets.id'), primary_key=True)
+# )
 
 class BookingStatus(str, enum.Enum):
     PENDING = "pending"
