@@ -7,6 +7,7 @@ class Vaccination(Base):
     __tablename__ = 'vaccinations'
 
     id = Column(Integer, primary_key=True)
+    legacy_inn_no = Column(Integer, nullable=True, unique=True)
     name = Column(String(100), nullable=False)
     validity_period = Column(Interval, nullable=True)  # How long the vaccination is valid for
     

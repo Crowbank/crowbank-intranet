@@ -7,6 +7,7 @@ class BreedCategory(Base):
     __tablename__ = 'breed_categories'
 
     id = Column(Integer, primary_key=True)
+    legacy_breedcat_no = Column(Integer, nullable=True, unique=True)
     name = Column(String(50), nullable=False)  # 'Small', 'Medium', 'Large', etc.
     species_id = Column(Integer, ForeignKey('species.id'), nullable=False)
     
@@ -21,6 +22,7 @@ class Breed(Base):
     __tablename__ = 'breeds'
 
     id = Column(Integer, primary_key=True)
+    legacy_breed_no = Column(Integer, nullable=True, unique=True)
     name = Column(String(100), nullable=False)
     short_name = Column(String(30), nullable=True)  # Abbreviated name, e.g., "GSD" for "German Shepherd Dog"
     

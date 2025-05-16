@@ -7,6 +7,7 @@ class Species(Base):
     __tablename__ = 'species'
 
     id = Column(Integer, primary_key=True)
+    legacy_spec_no = Column(Integer, nullable=True, unique=True)
     name = Column(String(50), nullable=False, unique=True)  # 'Dog', 'Cat', etc.
     
     # Relationships

@@ -17,7 +17,6 @@ class AddressMixin:
     
     street = Column(String(100), nullable=True)
     town = Column(String(50), nullable=True)
-    county = Column(String(50), nullable=True)
     postcode = Column(String(10), nullable=True)
     
     def get_full_address(self) -> str:
@@ -32,8 +31,6 @@ class AddressMixin:
             parts.append(self.street)
         if self.town:
             parts.append(self.town)
-        if self.county:
-            parts.append(self.county)
         if self.postcode:
             parts.append(self.postcode)
         
@@ -56,8 +53,6 @@ class AddressMixin:
             address_parts.append(self.street.replace(" ", "+"))
         if self.town:
             address_parts.append(self.town.replace(" ", "+"))
-        if self.county:
-            address_parts.append(self.county.replace(" ", "+"))
         address_parts.append(self.postcode.replace(" ", "+"))
         
         address_str = ",".join(address_parts)

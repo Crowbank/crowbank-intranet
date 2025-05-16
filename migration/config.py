@@ -33,8 +33,8 @@ class Settings:
         # SQL-Server ---------------------------------------------------------
         # Provide via env var or fall back to sane default (dev only!).
         self.mssql_url: str = os.getenv(
-            "LEGACY_MSSQL_URL",
-            "mssql+pyodbc://sa:<password>@192.168.0.150/PetAdmin?driver=ODBC+Driver+18+for+SQL+Server",
+            "192.168.0.200",
+            "mssql+pyodbc://PA:petadmin@192.168.0.200\\SQLEXPRESS/crowbank?driver=ODBC+Driver+18+for+SQL+Server&Encrypt=yes&TrustServerCertificate=yes",
         )
 
     # ---------------------------------------------------------------------

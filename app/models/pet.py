@@ -12,6 +12,7 @@ class Pet(Base):
     __tablename__ = 'pets'
 
     id = Column(Integer, primary_key=True)
+    legacy_pet_no = Column(Integer, nullable=True, unique=True)
     name = Column(String(100), nullable=False)
     date_of_birth = Column(Date, nullable=True)
     sex = Column(String(1), nullable=True)  # M/F

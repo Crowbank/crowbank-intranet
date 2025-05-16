@@ -60,7 +60,7 @@ class Booking(Base):
     __tablename__ = 'bookings'
 
     id = Column(Integer, primary_key=True)
-    legacy_booking_no = Column(Integer, nullable=True, unique=True)
+    legacy_bk_no = Column(Integer, nullable=True, unique=True)
     
     # Booking dates and times
     arrival_date = Column(Date, nullable=False)
@@ -105,7 +105,7 @@ class Booking(Base):
     
     def __repr__(self):
         pet_count = len(self.pets) if self.pets else 0
-        return f"<Booking(id={self.id}, pets={pet_count}, arrival={self.arrival_date}, departure={self.departure_date}, status='{self.status}')>"
+        return f"<Booking(id={self.id}, pets={pet_count}, arrival={self.arrival_date}, departure={self.departure_date}, status='{self.status}', legacy_bk_no={self.legacy_bk_no})>"
     
     @property
     def is_daycare(self):

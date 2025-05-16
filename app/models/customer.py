@@ -92,6 +92,9 @@ class Customer(Base, AddressMixin):
     opt_out = Column(Boolean, nullable=False, default=False)
     discount = Column(Numeric(5, 2), nullable=False, default=0)
 
+    # Stripe customer id (optional)
+    stripe_id = Column(String(50), nullable=True, unique=True)
+
     # Default Vet (FK - linking to Vet model)
     default_vet_id = Column(Integer, ForeignKey('vets.id'), nullable=True)
     default_vet = relationship(Vet, back_populates="customers")

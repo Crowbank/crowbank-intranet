@@ -14,6 +14,8 @@ class BoardingRun(Base):
     __tablename__ = 'boarding_runs'
 
     id = Column(Integer, primary_key=True)
+    # Legacy primary key from PetAdmin
+    legacy_run_no = Column(Integer, nullable=True, unique=True)
     name = Column(String(50), nullable=False)  # e.g., "North F1"
     code = Column(String(10), nullable=False)  # e.g., "NF1"
     wing = Column(String(50), nullable=True)  # e.g., "North", "South"

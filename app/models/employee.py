@@ -9,6 +9,7 @@ class Employee(Base):
     __tablename__ = 'employees'
 
     id = Column(Integer, primary_key=True)
+    legacy_emp_no = Column(Integer, nullable=True, unique=True)
     first_name = Column(String(50), nullable=False)
     last_name = Column(String(50), nullable=False)
     email = Column(String(100), nullable=True, unique=True)

@@ -9,6 +9,7 @@ class Vet(Base, AddressMixin):
     __tablename__ = 'vets'
 
     id = Column(Integer, primary_key=True)
+    legacy_vet_no = Column(Integer, nullable=True, unique=True)
     practice_name: Mapped[str] = mapped_column(String(100))
     street = Column(String(255), nullable=True)
     town = Column(String(100), nullable=True)
