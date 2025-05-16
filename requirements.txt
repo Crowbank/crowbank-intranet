@@ -24,4 +24,10 @@ pytest==7.4.3
 pytest-flask==1.3.0
 
 # Deployment
-gunicorn==21.2.0 
+gunicorn==21.2.0
+
+# Data Migration
+pyodbc==4.0.39
+pyyaml==6.0.1
+psycopg==3.1.16
+tqdm==4.66.1 
