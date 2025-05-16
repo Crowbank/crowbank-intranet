@@ -78,7 +78,7 @@ class Contact(Base, AddressMixin):
 
     def __repr__(self):
         return f"<Contact(id={self.id}, name='{self.full_name}')>"
-
+    e
 # Customer Model (Household)
 class Customer(Base, AddressMixin):
     __tablename__ = 'customers'

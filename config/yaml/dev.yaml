@@ -11,6 +11,15 @@ database:
   port: 54320
   name: "crowbank"
 
+# Legacy database settings
+legacy_database:
+  driver: "ODBC Driver 18 for SQL Server"
+  server: "192.168.0.200\\SQLEXPRESS"
+  database: "crowbank"
+  username: "PA"
+  password: "petadmin"
+  options: "TrustServerCertificate=yes;Encrypt=yes"
+
 # SQLAlchemy settings
 sqlalchemy:
   echo: true  # Log SQL queries
@@ -40,3 +49,4 @@ cloud_storage:
   endpoint: "https://4c5e823c2366476787d1b49d50d5d0a4.r2.cloudflarestorage.com"
   region: "auto"  # Already present
   public_url: "https://crowbank-media-dev.s3.us-east-1.amazonaws.com"  # Optional CDN/public URL if configured 
+  

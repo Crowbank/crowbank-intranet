@@ -3,39 +3,65 @@ from __future__ import annotations
 """Utility that builds SQL-Alchemy connection URLs for both databases."""
 
 import os
+import sys
 from pathlib import Path
-import yaml
+
+# Add the app module to the Python path
+sys.path.append(str(Path(__file__).resolve().parents[1]))
+
+from app.utils.yaml_config import load_config
 
 
 class Settings:
-    """Resolves credentials from YAML files and environment variables."""
+    """Resolves credentials from YAML configuration."""
 
     def __init__(self) -> None:
-        root = Path(__file__).resolve().parents[1]  # repo root
-
-        secret_yaml = Path(root, "config/yaml/secret.yaml")
-        dev_yaml = Path(root, "config/yaml/dev.yaml")
-
-        secret = yaml.safe_load(secret_yaml.read_text()) if secret_yaml.exists() else {}
-        dev = yaml.safe_load(dev_yaml.read_text()) if dev_yaml.exists() else {}
-
+        # Load config using the standard yaml_config loader
+        config = load_config()
+        nested_config = config['nested']
+        
         # PostgreSQL ---------------------------------------------------------
-        pg_user = secret["database"]["user"]
-        pg_pass = secret["database"]["password"]
-        pg_host = dev["database"]["host"]
-        pg_port = dev["database"]["port"]
-        pg_db   = dev["database"]["name"]
-
-        self.pg_url: str = (
-            f"postgresql+psycopg://{pg_user}:{pg_pass}@{pg_host}:{pg_port}/{pg_db}"
-        )
+        # Get database configuration
+        db = nested_config.get('database', {})
+        legacy_db = nested_config.get('legacy_database', {})
+        
+        # Build PostgreSQL URL if not already in config
+        if 'sqlalchemy' in nested_config and 'database_uri' in nested_config['sqlalchemy']:
+            self.pg_url = nested_config['sqlalchemy']['database_uri']
+        else:
+            # Extract required values
+            pg_user = db.get('user', '')
+            pg_pass = db.get('password', '')
+            pg_host = db.get('host', 'localhost')
+            pg_port = db.get('port', 5432)
+            pg_db = db.get('name', 'crowbank')
+            
+            # Build the connection URL
+            self.pg_url: str = (
+                f"postgresql+psycopg://{pg_user}:{pg_pass}@{pg_host}:{pg_port}/{pg_db}"
+            )
 
         # SQL-Server ---------------------------------------------------------
-        # Provide via env var or fall back to sane default (dev only!).
-        self.mssql_url: str = os.getenv(
-            "192.168.0.200",
-            "mssql+pyodbc://PA:petadmin@192.168.0.200\\SQLEXPRESS/crowbank?driver=ODBC+Driver+18+for+SQL+Server&Encrypt=yes&TrustServerCertificate=yes",
-        )
+        # Build SQL Server URL from legacy database config
+        if legacy_db:
+            driver = legacy_db.get('driver', 'ODBC Driver 18 for SQL Server')
+            server = legacy_db.get('server', '192.168.0.200\\SQLEXPRESS')
+            database = legacy_db.get('database', 'crowbank')
+            username = legacy_db.get('username', 'PA')
+            password = legacy_db.get('password', 'petadmin')
+            options = legacy_db.get('options', 'TrustServerCertificate=yes;Encrypt=yes')
+            
+            # Allow override from environment variable
+            self.mssql_url: str = os.getenv(
+                "LEGACY_DB_URL",
+                f"mssql+pyodbc://{username}:{password}@{server}/{database}?driver={driver.replace(' ', '+')}&{options}"
+            )
+        else:
+            # Fallback to environment variable or default
+            self.mssql_url: str = os.getenv(
+                "LEGACY_DB_URL",
+                "mssql+pyodbc://PA:petadmin@192.168.0.200\\SQLEXPRESS/crowbank?driver=ODBC+Driver+18+for+SQL+Server&Encrypt=yes&TrustServerCertificate=yes"
+            )
 
     # ---------------------------------------------------------------------
     def __repr__(self) -> str:  # pragma: no cover
