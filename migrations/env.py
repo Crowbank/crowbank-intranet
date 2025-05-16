@@ -17,9 +17,8 @@ target_metadata = Base.metadata
 # Alembic Config
 config = context.config
 
-# Force sqlalchemy.url to use DB_PASSWORD from environment
-_db_password = os.getenv("DB_PASSWORD")
-_db_url = f"postgresql://crowbank:{_db_password}@localhost/crowbank"
+# Hardcode database connection information for reliable migrations
+_db_url = "postgresql://crowbank:ZhV8Pk521j1Z@192.168.0.201:54320/crowbank"
 config.set_main_option("sqlalchemy.url", _db_url)
 
 # Logging

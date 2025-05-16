@@ -9,7 +9,7 @@ config = {
     "TESTING": False,
     
     # Database settings (with placeholder password that will be overridden)
-    "SQLALCHEMY_DATABASE_URI": "postgresql://crowbank:password@localhost/crowbank",
+    "SQLALCHEMY_DATABASE_URI": "postgresql://crowbank:ZhV8Pk521j1Z@192.168.0.201:54320/crowbank",
     "SQLALCHEMY_ECHO": True,  # Log SQL queries
     
     # Logging

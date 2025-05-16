@@ -4,13 +4,13 @@
 flask:
   debug: false
   testing: true
-  server_name: "localhost"
+  server_name: "192.168.0.201"
   preserve_context_on_exception: false
 
 # Database settings (test database)
 database:
-  host: "localhost"
-  port: 5432
+  host: "192.168.0.201"
+  port: 54320
   name: "crowbank_test"
 
 # SQLAlchemy settings

@@ -7,8 +7,8 @@ flask:
 
 # Database settings (credentials should be in secret.yaml)
 database:
-  host: "localhost"
-  port: 5432
+  host: "192.168.0.201"
+  port: 54320
   name: "crowbank"
 
 # SQLAlchemy settings
