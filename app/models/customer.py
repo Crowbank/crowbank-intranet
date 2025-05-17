@@ -1,6 +1,7 @@
 import enum
-from sqlalchemy import Column, Integer, String, Text, ForeignKey, Enum, Boolean, Numeric, UniqueConstraint
+from sqlalchemy import Column, Integer, String, Text, ForeignKey, Enum, Boolean, Numeric, UniqueConstraint, Index
 from sqlalchemy.orm import relationship, validates
+import sqlalchemy as sa
 
 from .base import Base
 from .vet import Vet
@@ -19,6 +20,7 @@ class CustomerContact(Base):
     customer_id = Column(Integer, ForeignKey('customers.id'), primary_key=True)
     contact_id = Column(Integer, ForeignKey('contacts.id'), primary_key=True)
     role = Column(Enum(ContactRole), nullable=False)
+    relation_type = Column(String(50), nullable=True)  # e.g., 'father', 'friend'
 
     customer = relationship("Customer", back_populates="contact_associations")
     contact = relationship("Contact", back_populates="customer_associations")
@@ -39,14 +41,17 @@ class CustomerContact(Base):
     )
 
 # Contact Model (Individual Person)
-class Contact(Base, AddressMixin):
+class Contact(Base):
     __tablename__ = 'contacts'
 
     id = Column(Integer, primary_key=True)
+    legacy_contact_no = Column(Integer, nullable=True, unique=True)
     first_name = Column(String(100), nullable=False)
     last_name = Column(String(100), nullable=False)
-    phone_number = Column(String(30), nullable=True)
-    email_address = Column(String(255), nullable=True, unique=True)
+    phone_number = Column(String(30), nullable=True)          # primary phone (mobile preferred)
+    phone_alt = Column(String(30), nullable=True)             # secondary/landline
+    email_address = Column(String(255), nullable=True)        # primary email
+    email_alt = Column(String(255), nullable=True)            # secondary/work email
     notes = Column(Text, nullable=True)
 
     customer_associations = relationship("CustomerContact", back_populates="contact")
@@ -93,7 +98,7 @@ class Customer(Base, AddressMixin):
     discount = Column(Numeric(5, 2), nullable=False, default=0)
 
     # Stripe customer id (optional)
-    stripe_id = Column(String(50), nullable=True, unique=True)
+    stripe_id = Column(String(50), nullable=True)
 
     # Default Vet (FK - linking to Vet model)
     default_vet_id = Column(Integer, ForeignKey('vets.id'), nullable=True)
@@ -152,3 +157,13 @@ class Customer(Base, AddressMixin):
         if form_type:
             return [s for s in self.form_submissions if s.template.type == form_type]
         return self.form_submissions 
+
+    __table_args__ = (
+        # Unique index on stripe_id, but only when it is not null and not empty
+        sa.Index(
+            'ix_customers_stripe_id_unique',
+            'stripe_id',
+            unique=True,
+            postgresql_where=sa.text("stripe_id IS NOT NULL AND stripe_id <> ''")
+        ),
+    ) 

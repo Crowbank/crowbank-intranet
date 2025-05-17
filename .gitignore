@@ -58,3 +58,6 @@ legacy/**/*
 # .env.test.local
 # .env.production.local # Configuration secrets
 config/yaml/secret.yaml
+
+# Temporary scripts
+scripts/temp/
