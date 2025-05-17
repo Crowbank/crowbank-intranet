@@ -18,6 +18,9 @@ CHUNK = 2_000
 # Only declare FK columns that need translation; simple columns stay as-is.
 IMPORT_PLAN = [
     ("v_vets", "vets", {}, "legacy_vet_no"),
+    ("v_species", "species", {}, "legacy_spec_no"),
+    ("v_breed_categories", "breed_categories", {"species_id": "species"}, "legacy_breedcat_no"),
+    ("v_breeds", "breeds", {"species_id": "species", "category_id": "breed_categories"}, "legacy_breed_no"),
     ("v_customers", "customers", {"default_vet_id": "vets"}, "legacy_cust_no"),
     ("v_contacts", "contacts", {}, "legacy_contact_no"),
     ("v_customer_contacts", "customer_contacts",

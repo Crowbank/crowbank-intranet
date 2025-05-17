@@ -18,7 +18,7 @@ legacy_database:
   database: "crowbank"
   username: "PA"
   password: "petadmin"
-  options: "TrustServerCertificate=yes;Encrypt=yes"
+  options: "TrustServerCertificate=yes"
 
 # SQLAlchemy settings
 sqlalchemy:

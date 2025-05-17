@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, ForeignKey, Boolean, Numeric
 from sqlalchemy.orm import relationship
 
 from .base import Base
@@ -25,6 +25,11 @@ class Breed(Base):
     legacy_breed_no = Column(Integer, nullable=True, unique=True)
     name = Column(String(100), nullable=False)
     short_name = Column(String(30), nullable=True)  # Abbreviated name, e.g., "GSD" for "German Shepherd Dog"
+    
+    # Additional legacy attributes
+    suspect = Column(Boolean, default=False, nullable=False)
+    weight = Column(Numeric(5, 2), nullable=True)  # 1=small, 2=medium, 3=large
+    share_single = Column(Boolean, default=True, nullable=False)
     
     # Foreign Keys
     species_id = Column(Integer, ForeignKey('species.id'), nullable=False)
