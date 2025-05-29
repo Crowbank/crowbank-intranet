@@ -115,4 +115,4 @@ def _register_template_context(app):
     """Register template context processors."""
     @app.context_processor
     def inject_now():
-        return {'now': datetime.utcnow()} 
+        return {'now': datetime.utcnow()}

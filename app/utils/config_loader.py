@@ -129,4 +129,4 @@ def get_config_value(key: str, default: Any = None, env: Optional[str] = None) -
         The configuration value or the default value if not found
     """
     config = load_config(env)
-    return config.get(key, default) 
+    return config.get(key, default)
