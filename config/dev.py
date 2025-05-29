@@ -22,4 +22,4 @@ config = {
     # Debugging tools
     "DEBUG_TB_ENABLED": True,        # Enable Flask-DebugToolbar
     "DEBUG_TB_INTERCEPT_REDIRECTS": False,
-} 
+}

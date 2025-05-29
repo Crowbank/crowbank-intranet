@@ -32,4 +32,4 @@ config = {
     
     # Email error reporting
     "MAIL_ERROR_RECIPIENT": "admin@crowbank.co.uk",
-} 
+}

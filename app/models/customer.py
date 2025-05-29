@@ -74,4 +74,4 @@ class Customer(Base, AddressMixin):
     def __repr__(self):
         primary = self.primary_contacts
         name = f"{primary[0].first_name} {primary[0].last_name}" if primary else f"Household {self.id}"
-        return f"<Customer(id={self.id}, name='{name}', legacy_cust_no={self.legacy_cust_no})>" 
+        return f"<Customer(id={self.id}, name='{name}', legacy_cust_no={self.legacy_cust_no})>"

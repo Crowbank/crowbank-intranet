@@ -26,4 +26,4 @@ config = {
     # Make tests faster
     "BCRYPT_LOG_ROUNDS": 4,  # Lower encryption rounds for faster tests
     "PASSWORD_HASH_METHOD": "plain",  # Use plaintext passwords for tests
-} 
+}

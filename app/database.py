@@ -22,4 +22,4 @@ def init_db():
 
 def get_session():
     """Get a new database session."""
-    return Session() 
+    return Session()
