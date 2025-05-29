@@ -25,9 +25,9 @@ migrations/          (Alembic)
 static/              (Tailwind, HTMX, Alpine.js frontend)
 
 [Naming Conventions]
-- Tables: tblsingular (e.g., tblbooking)
-- Primary Keys: integer named table_no (e.g., booking_no)
-- Foreign Keys: explicit naming (e.g., pet_owner_no)
+- Tables: plural snake_case (e.g., customers)
+- Primary Keys: integer named id
+- Foreign Keys: explicit naming (e.g., pet_owner_id)
 - Variables/functions: snake_case
 - Classes: PascalCase
 
