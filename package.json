@@ -1,0 +1,26 @@
+{
+  "name": "crowbank-intranet",
+  "version": "1.0.0",
+  "description": "**Crowbank Intranet** is the internal management platform for Crowbank Kennels & Cattery. It replaces legacy systems with a modern, modular, and maintainable solution, designed to streamline bookings, pet care, staff scheduling, and customer communication.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Crowbank/crowbank-intranet.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Crowbank/crowbank-intranet/issues"
+  },
+  "homepage": "https://github.com/Crowbank/crowbank-intranet#readme",
+  "dependencies": {
+    "@modelcontextprotocol/server-postgres": "^0.6.2"
+  }
+}

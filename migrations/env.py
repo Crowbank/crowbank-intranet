@@ -12,6 +12,28 @@ load_dotenv()
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from app.models.base import Base
 
+# Import all models so their tables are registered with Base.metadata
+import app.models.booking
+import app.models.customer
+import app.models.breed
+import app.models.vet
+import app.models.mixins
+import app.models.vaccination
+import app.models.species
+import app.models.pet
+import app.models.employee
+import app.models.boarding_run
+import app.models.pet_weight
+import app.models.pet_document
+import app.models.invoice
+import app.models.media_file
+import app.models.medical_condition
+import app.models.form
+import app.models.insurance
+import app.models.daily_allocation
+import app.models.booking_intent
+import app.models.service
+
 target_metadata = Base.metadata
 
 # Alembic Config

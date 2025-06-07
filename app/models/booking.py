@@ -80,10 +80,10 @@ class Booking(Base):
     checked_in_at = Column(DateTime, nullable=True)
     checked_out_at = Column(DateTime, nullable=True)
     
-    # Pricing
+    # Pricing fields (will be deprecated in favor of Invoice model)
     discount_percentage = Column(Numeric(5, 2), nullable=False, default=0)
     total_cost = Column(Numeric(10, 2), nullable=True)  # Calculated when confirmed
-    deposit_paid = Column(Numeric(10, 2), nullable=False, default=0)
+    deposit_paid = Column(Numeric(10, 2), nullable=False, default=0)  # Deprecated: use paid_amount property
     
     # Foreign Keys
     customer_id = Column(Integer, ForeignKey('customers.id'), nullable=False)
@@ -201,4 +201,65 @@ class Booking(Base):
         for pet_booking in self.pet_bookings:
             if pet_booking.pet_id == pet_id:
                 return pet_booking
-        return None 
+        return None
+    
+    # Financial Properties (calculated from Invoice)
+    
+    @property
+    def calculated_total_cost(self):
+        """
+        Calculate the total cost of this booking from its invoice.
+        Falls back to the legacy total_cost field if no invoice exists.
+        
+        Returns:
+            Net amount from invoice (after discounts) or legacy total_cost
+        """
+        if self.invoice:
+            return self.invoice.net_amount
+        return self.total_cost or 0
+    
+    @property
+    def paid_amount(self):
+        """
+        Calculate the total amount paid for this booking from its invoice.
+        Falls back to the legacy deposit_paid field if no invoice exists.
+        
+        Returns:
+            Sum of all payments for this booking or legacy deposit_paid
+        """
+        if self.invoice:
+            return self.invoice.amount_paid
+        return self.deposit_paid or 0
+    
+    @property
+    def outstanding_amount(self):
+        """
+        Calculate the outstanding amount for this booking.
+        
+        Returns:
+            Amount still owed (calculated_total_cost - paid_amount)
+        """
+        return self.calculated_total_cost - self.paid_amount
+    
+    @property
+    def is_paid(self):
+        """
+        Check if this booking is fully paid.
+        
+        Returns:
+            True if outstanding_amount <= 0, False otherwise
+        """
+        return self.outstanding_amount <= 0
+    
+    @property
+    def calculated_discount_percentage(self):
+        """
+        Get the discount percentage from the invoice.
+        Falls back to the legacy discount_percentage field if no invoice exists.
+        
+        Returns:
+            Percentage discount from invoice or legacy field
+        """
+        if self.invoice:
+            return self.invoice.percentage_discount
+        return self.discount_percentage or 0 

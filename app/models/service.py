@@ -41,6 +41,11 @@ class Season(str, enum.Enum):
     LOW = "low"                     # Low/off season
     HOLIDAY = "holiday"             # Holiday periods
 
+class LegacyRange(enum.IntEnum):
+    LOCAL = 1
+    MEDIUM = 2
+    FAR = 3
+
 class Service(Base):
     """
     Represents a service that can be provided and charged to customers.
@@ -150,15 +155,20 @@ class Service(Base):
 class ServiceRate(Base):
     """
     Stores the rate for a specific service, which can vary based on
-    species, breed type, or distance range.
+    species, breed type, or distance range. The 'category_legacy' column
+    is an integer corresponding to the legacy identifier for species,
+    breed type, or range (see LegacyRange enum for range-based rates).
+    The 'category' column is the mapped new database ID or enum value.
     """
     __tablename__ = 'service_rates'
 
     id = Column(Integer, primary_key=True)
     service_id = Column(Integer, ForeignKey('services.id'), nullable=False)
     
-    # Category could be species ID, breed type, or range category
-    category = Column(String(50), nullable=True)
+    # Legacy category: species, breed type, or range enum (as integer)
+    category_legacy = Column(Integer, nullable=True)
+    # New category: mapped to new DB id or enum (as integer)
+    category = Column(Integer, nullable=True)
     rate = Column(Numeric(10, 2), nullable=False)
     season = Column(Enum(Season), default=Season.STANDARD, nullable=False)  # For seasonal pricing
     
@@ -171,7 +181,7 @@ class ServiceRate(Base):
     
     def __repr__(self):
         season_info = f", season={self.season}" if self.season != Season.STANDARD else ""
-        return f"<ServiceRate(service_id={self.service_id}, category='{self.category}', rate={self.rate}{season_info})>"
+        return f"<ServiceRate(service_id={self.service_id}, category_legacy={self.category_legacy}, category={self.category}, rate={self.rate}{season_info})>"
 
 class PeakDate(Base):
     """

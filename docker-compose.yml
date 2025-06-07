@@ -1,12 +1,18 @@
 services:
-  crowbank-postgres:
-    image: postgres:15-alpine
-    container_name: crowbank-postgres
+  postgres-mcp-server:
+    image: mcp/postgres
+    container_name: crowbank-postgres-mcp-local
+    restart: unless-stopped
+    command: ["node", "dist/index.js", "postgresql://crowbank:ZhV8Pk521j1Z@192.168.0.201:54320/crowbank"]
+    ports:
+      - "3001:3001"
+
+  github-mcp-server:
+    image: ghcr.io/github/github-mcp-server
+    container_name: crowbank-github-mcp-local
     restart: unless-stopped
     environment:
-      POSTGRES_DB: crowbank
-      POSTGRES_USER: crowbank
-      POSTGRES_PASSWORD: ZhV8Pk521j1Z
+      - GITHUB_PERSONAL_ACCESS_TOKEN=${GITHUB_TOKEN}
     ports:
       - "5432:5432"
     volumes:

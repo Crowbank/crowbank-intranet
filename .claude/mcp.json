@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "postgres": {
+      "command": "node",
+      "args": [
+        "/home/crowbank/crowbank-intranet/node_modules/@modelcontextprotocol/server-postgres/dist/index.js"
+      ],
+      "env": {
+        "DATABASE_URL": "postgresql://crowbank:ZhV8Pk521j1Z@192.168.0.201:54320/crowbank"
+      }
+    }
+  }
+}

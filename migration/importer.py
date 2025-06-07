@@ -25,6 +25,8 @@ IMPORT_PLAN = [
     ("v_customers", "customers", {"default_vet_id": "vets"}, "legacy_cust_no"),
     ("v_contacts", "contacts", {}, "legacy_contact_no"),
     ("v_customer_contacts", "customer_contacts", {}, None),  # Handle FKs in custom code
+    ("v_boarding_runs", "boarding_runs", {}, "legacy_run_no"),  # Handle run_type_id separately
+    ("v_services", "services", {}, "legacy_service_id"),  # Service catalog import
 ]
 
 # ---------------------------------------------------------------------------
@@ -113,6 +115,29 @@ def import_table(view: str, dest_name: str, fk_map: dict[str, str], pk_col: str,
                     # Skip if customer not imported yet
                     continue
                     
+        # Special case for boarding_runs to assign run_type_id
+        if dest_name == "boarding_runs" and "legacy_runtype_no" in rec:
+            legacy_runtype_no = rec.pop("legacy_runtype_no", None)
+            # Since legacy runs have runtype_no = 0, assign default Standard Dog Run (id=1)
+            rec["run_type_id"] = 1  # Default to DOG_STANDARD
+            # Add is_active field if not present
+            if "is_active" not in rec:
+                rec["is_active"] = True
+            
+            # Fix codes that are too long (max 10 chars)
+            if "code" in rec and len(rec["code"]) > 10:
+                code_mapping = {
+                    "AtHome (Cat)": "AtHomeCat"
+                }
+                original_code = rec["code"]
+                if original_code in code_mapping:
+                    rec["code"] = code_mapping[original_code]
+                    print(f"Mapped long code '{original_code}' -> '{rec['code']}'")
+                else:
+                    # Fallback: truncate to 10 chars
+                    rec["code"] = rec["code"][:10]
+                    print(f"Truncated long code '{original_code}' -> '{rec['code']}')")
+                    
         pending.append(rec)
         if pk_col:
             legacy_ids.append(legacy_id)
@@ -174,6 +199,15 @@ def main(argv: list[str] | None = None):  # pragma: no cover
             contact_rows = conn.execute(sa.text("SELECT legacy_contact_no, id FROM contacts WHERE legacy_contact_no IS NOT NULL")).all()
             lookup['contacts'] = {row[0]: row[1] for row in contact_rows}
             print(f"Preloaded {len(lookup['contacts'])} contact mappings")
+    
+    # Preload run_types mappings for boarding_runs FK resolution
+    if selected_tables is None or 'boarding_runs' in selected_tables:
+        with _engine_dst.connect() as conn:
+            # Load run_types mappings (assuming legacy_run_type_no exists)
+            run_type_rows = conn.execute(sa.text("SELECT code, id FROM run_types")).all()
+            # Map by code since run_types might not have legacy IDs
+            lookup['run_types'] = {row[0]: row[1] for row in run_type_rows}
+            print(f"Preloaded {len(lookup['run_types'])} run_type mappings")
 
     for view, dest_tbl, fk_map, pk_col in IMPORT_PLAN:
         if selected_tables is not None and dest_tbl.lower() not in selected_tables:
