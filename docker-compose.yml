@@ -1,4 +1,35 @@
 services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: crowbank-app-dev
+    restart: unless-stopped
+    ports:
+      - "2222:22"    # SSH for devuser
+      - "5000:5000"  # Flask dev server
+    volumes:
+      - ./:/app  # Mount project source
+      - ./config/yaml/secret.yaml:/app/config/yaml/secret.yaml:ro  # Mount secrets (read-only)
+    networks:
+      - dev-net
+    # No secrets in environment variables; app reads from mounted secret.yaml
+
+  crowbank-postgres:
+    image: postgres:16-alpine
+    container_name: crowbank-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-crowbank}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_DB: ${POSTGRES_DB:-crowbank}
+    ports:
+      - "5432:5432"  # Default Postgres port
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - dev-net
+
   postgres-mcp-server:
     image: mcp/postgres
     container_name: crowbank-postgres-mcp-local
@@ -6,6 +37,8 @@ services:
     command: ["node", "dist/index.js", "postgresql://crowbank:ZhV8Pk521j1Z@192.168.0.201:54320/crowbank"]
     ports:
       - "3001:3001"
+    networks:
+      - dev-net
 
   github-mcp-server:
     image: ghcr.io/github/github-mcp-server
@@ -13,8 +46,8 @@ services:
     restart: unless-stopped
     environment:
       - GITHUB_PERSONAL_ACCESS_TOKEN=${GITHUB_TOKEN}
-    ports:
-      - "5432:5432"
+    # ports:
+    #   - "5432:5432"  # Commented out to avoid conflict with main Postgres
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./init-scripts:/docker-entrypoint-initdb.d
@@ -23,6 +56,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - dev-net
 
   pgadmin:
     image: dpage/pgadmin4:9.4
@@ -40,26 +75,15 @@ services:
     depends_on:
       crowbank-postgres:
         condition: service_healthy
-
-  redis:
-    image: redis:alpine
-    container_name: crowbank-redis
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    command: redis-server --appendonly yes
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    networks:
+      - dev-net
 
 volumes:
   pgdata:
     name: crowbank_pgdata
   pgadmin_data:
     name: crowbank_pgadmin
-  redis_data:
-    name: crowbank_redis
+
+networks:
+  dev-net:
+    name: dev-network

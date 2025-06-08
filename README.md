@@ -163,3 +163,11 @@ For more details, see the [Configuration Management](docs/configuration_manageme
 ## 📄 License
 
 Internal use only—not for public distribution.
+
+## Docker Secrets Handling
+
+- Secrets (database credentials, API keys, etc.) are stored in `config/yaml/secret.yaml` and **must not** be committed to version control.
+- The Docker image does **not** copy secrets at build time. Instead, `docker-compose.yml` mounts `config/yaml/secret.yaml` into the container at `/app/config/yaml/secret.yaml` (read-only).
+- Ensure `config/yaml/secret.yaml` exists on your host before running `docker-compose up`.
+- `.dockerignore` includes `config/yaml/secret.yaml` to prevent accidental inclusion in images.
+- The application reads secrets from the mounted file at runtime.
