@@ -1,0 +1,12 @@
+services:
+  app:
+    # Pull the image from GitHub Container Registry
+    image: ghcr.io/crowbank/crowbank-intranet:latest
+    container_name: crowbank-app-prod
+    restart: unless-stopped
+    ports:
+      - "5000:5000"  # Expose the Flask app port
+    volumes:
+      # You must ensure this secrets file is on your NAS
+      # and this path is correct relative to where you run the command.
+      - ./config/yaml/secret.yaml:/app/config/yaml/secret.yaml:ro 
