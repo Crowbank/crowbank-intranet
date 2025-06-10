@@ -15,9 +15,11 @@ RUN useradd -m -s /bin/bash devuser && \
     echo "devuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 # Configure SSH access (password-based for simple local dev)
-RUN echo 'devuser:your-secure-ssh-password' | chpasswd && \
+RUN echo 'devuser:iEgB18gP1ZAw' | chpasswd && \
     mkdir -p /home/devuser/.ssh && \
-    chown -R devuser:devuser /home/devuser/.ssh
+    chown -R devuser:devuser /home/devuser/.ssh && \
+    # Enable TCP Forwarding for Cursor/VSCode Remote
+    echo "AllowTcpForwarding yes" >> /etc/ssh/sshd_config
 
 # Set working directory
 WORKDIR /app

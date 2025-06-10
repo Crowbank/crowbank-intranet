@@ -1,7 +1,7 @@
 services:
   app:
-    # Pull the image from GitHub Container Registry
-    image: ghcr.io/crowbank/crowbank-intranet:latest
+    # Pull the image from Docker Hub
+    image: crowbank/crowbank-intranet:latest
     container_name: crowbank-app-prod
     restart: unless-stopped
     ports:

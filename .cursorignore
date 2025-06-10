@@ -1,0 +1,33 @@
+# Node.js dependencies
+node_modules/
+
+# Python virtual environment
+venv/
+.venv/
+
+# Python cache files
+__pycache__/
+*.pyc
+
+# Build and distribution artifacts
+dist/
+build/
+*.egg-info/
+
+# Log files
+*.log
+logs/
+
+# Local instance folder (common in Flask)
+instance/
+
+# Editor/IDE-specific metadata that doesn't need to be indexed
+.vscode/
+.idea/
+
+# Environment files (don't contain code)
+.env
+*.env
+
+# Git directory (Cursor handles git history separately)
+.git/ 
