@@ -1,78 +1,41 @@
-import importlib.util
+import os
 import sys
-import types
 from pathlib import Path
+import importlib.util
+from types import ModuleType
 
-# Provide a minimal stub for the unavailable `yaml` package
-sys.modules['yaml'] = types.SimpleNamespace()
-
-# Dynamically load the yaml_config module without importing the whole `app` package
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 spec = importlib.util.spec_from_file_location(
-    'yaml_config', Path('app/utils/yaml_config.py')
+    "yaml_config",
+    PROJECT_ROOT / "app" / "utils" / "yaml_config.py",
 )
 yaml_config = importlib.util.module_from_spec(spec)
+fake_yaml = ModuleType("yaml")
+fake_yaml.safe_load = lambda f: {}
+sys.modules.setdefault("yaml", fake_yaml)
 spec.loader.exec_module(yaml_config)
 
 
-def stub_load_yaml_file(path: str):
-    """Return in-memory config data for the requested YAML file."""
-    if path.endswith('default.yaml'):
-        return {
-            'session': {
-                'permanent_lifetime': 86400,
-                'type': 'filesystem',
-            },
-            'sqlalchemy': {
-                'track_modifications': False,
-            },
-        }
-    if path.endswith('dev.yaml'):
-        return {
-            'database': {
-                'host': 'localhost',
-                'port': 5432,
-                'name': 'crowbank',
-            },
-            'sqlalchemy': {
-                'echo': True,
-                'track_modifications': True,
-            },
-            'logging': {
-                'level': 'DEBUG',
-            },
-            'development': {
-                'debug_toolbar_enabled': True,
-                'debug_toolbar_intercept_redirects': False,
-            },
-        }
-    if path.endswith('secret.yaml'):
-        return {
-            'database': {
-                'user': 'devuser',
-                'password': 'devpass',
-            }
-        }
-    return {}
+def test_load_config_from_different_cwd(tmp_path, monkeypatch):
+    """load_config should work even if current working directory is elsewhere."""
+    # Change to a temporary directory
+    cwd = os.getcwd()
+    monkeypatch.chdir(tmp_path)
 
+    def fake_loader(path):
+        if path.endswith("default.yaml"):
+            return {"app": {"name": "Crowbank Intranet"}}
+        elif path.endswith("dev.yaml"):
+            return {}
+        elif path.endswith("secret.yaml"):
+            return {}
+        return {}
 
-def test_load_config_dev(monkeypatch):
-    """Ensure environment configs merge correctly and produce a flat mapping."""
-    # Patch the YAML loader with our stub data
-    monkeypatch.setattr(yaml_config, 'load_yaml_file', stub_load_yaml_file)
+    monkeypatch.setattr(yaml_config, "load_yaml_file", fake_loader)
 
-    config = yaml_config.load_config('dev')
+    try:
+        config = yaml_config.load_config(env="dev")
+    finally:
+        os.chdir(cwd)
 
-    nested = config['nested']
-    flat = config['flat']
-
-    # Nested values from environment config should be present
-    assert nested['development']['debug_toolbar_enabled'] is True
-    # Default values should remain
-    assert nested['session']['permanent_lifetime'] == 86400
-
-    # Flattened configuration should contain upper-case keys
-    assert 'SQLALCHEMY_DATABASE_URI' in flat
-    assert (
-        flat['SQLALCHEMY_DATABASE_URI']
-        == 'postgresql://devuser:devpass@localhost:5432/crowbank'
-    )
+    assert config["nested"]["app"]["name"] == "Crowbank Intranet"

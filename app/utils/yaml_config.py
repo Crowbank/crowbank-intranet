@@ -62,7 +62,7 @@ def load_yaml_file(file_path: str) -> Dict[str, Any]:
         Dictionary with config data, empty dict if file not found
     """
     try:
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r', encoding='utf-8') as file:
             config_data = yaml.safe_load(file) or {}
             return config_data
     except FileNotFoundError:
@@ -110,7 +110,10 @@ def load_config(env: Optional[str] = None) -> Dict[str, Any]:
         A dictionary containing all configuration settings.
     """
     # Base config directory
-    config_dir = os.path.join(os.getcwd(), 'config', 'yaml')
+    # Use the repository root relative to this file instead of the current
+    # working directory so the loader works no matter where it is invoked from.
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+    config_dir = os.path.join(base_dir, 'config', 'yaml')
     
     # 1. Determine environment
     flask_env = env or os.getenv("FLASK_ENV", "dev")
