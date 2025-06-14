@@ -188,4 +188,4 @@ def get_config_value(path: str, default: Any = None) -> Any:
         else:
             return default
     
-    return config 
+    return config

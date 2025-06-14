@@ -22,4 +22,4 @@ class Vet(Base, AddressMixin):
     pets = relationship("Pet", back_populates="vet")
 
     def __repr__(self):
-        return f"<Vet(id={self.id}, practice_name='{self.practice_name}')>" 
+        return f"<Vet(id={self.id}, practice_name='{self.practice_name}')>"

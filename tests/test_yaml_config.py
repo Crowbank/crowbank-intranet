@@ -39,4 +39,3 @@ def test_load_config_from_different_cwd(tmp_path, monkeypatch):
         os.chdir(cwd)
 
     assert config["nested"]["app"]["name"] == "Crowbank Intranet"
-

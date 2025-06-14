@@ -88,4 +88,4 @@ class ContactDetailsMixin:
             return self.phone
         if self.email:
             return self.email
-        return None 
+        return None

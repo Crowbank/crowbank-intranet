@@ -54,4 +54,4 @@ class CrowbankBase:
         Returns:
             Model instance if found, otherwise None
         """
-        return session.query(cls).filter(cls.id == model_id).first() 
+        return session.query(cls).filter(cls.id == model_id).first()

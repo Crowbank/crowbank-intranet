@@ -34,4 +34,4 @@ config = {
     
     # SQLAlchemy
     "SQLALCHEMY_TRACK_MODIFICATIONS": False,
-} 
+}
