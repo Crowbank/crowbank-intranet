@@ -4,70 +4,73 @@ Crowbank Intranet - Flask Application Factory
 
 import os
 from datetime import datetime
+
 from flask import Flask, render_template
 
+from app.extensions import cloud_storage, db, migrate
 from app.utils.yaml_config import load_config
-from app.extensions import db, migrate, cloud_storage
 
 
 def create_app(test_config=None):
     """
     Create and configure the Flask application.
-    
+
     Args:
         test_config: Configuration to use for testing (overrides loaded config)
-        
+
     Returns:
         The configured Flask application
     """
     # Create Flask app instance
-    app = Flask(__name__, 
-                instance_relative_config=True,
-                template_folder='templates',
-                static_folder='static')
-    
+    app = Flask(
+        __name__,
+        instance_relative_config=True,
+        template_folder="templates",
+        static_folder="static",
+    )
+
     # Load configuration from YAML files
     config = load_config()
-    
+
     # Apply the flattened config to Flask
-    app.config.from_mapping(config['flat'])
-    
+    app.config.from_mapping(config["flat"])
+
     # Make nested config available as well
-    app.config['CONFIG'] = config['nested']
-    
+    app.config["CONFIG"] = config["nested"]
+
     # Override with test config if provided
     if test_config:
         app.config.update(test_config)
-    
+
     # Ensure the instance folder exists
     try:
         os.makedirs(app.instance_path, exist_ok=True)
     except OSError:
         pass
-    
+
     # Register extensions
     _register_extensions(app)
-    
+
     # Register blueprints
     # _register_blueprints(app)
-    
+
     # Register error handlers
     # _register_error_handlers(app)
-    
+
     # Register shell context
     _register_shell_context(app)
-    
+
     # Register CLI commands
     # _register_commands(app)
-    
+
     # Register template context
     _register_template_context(app)
-    
+
     # Home route
-    @app.route('/')
+    @app.route("/")
     def home():
-        return render_template('home.html')
-    
+        return render_template("home.html")
+
     return app
 
 
@@ -97,9 +100,10 @@ def _register_error_handlers(app):
 
 def _register_shell_context(app):
     """Register shell context objects."""
+
     @app.shell_context_processor
     def make_shell_context():
-        return {'app': app, 'db': db}
+        return {"app": app, "db": db}
 
 
 def _register_commands(app):
@@ -114,6 +118,7 @@ def _register_commands(app):
 
 def _register_template_context(app):
     """Register template context processors."""
+
     @app.context_processor
     def inject_now():
-        return {'now': datetime.utcnow()} 
+        return {"now": datetime.utcnow()}

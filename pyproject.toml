@@ -1,0 +1,201 @@
+[project]
+name = "crowbank-intranet"
+version = "0.1.0"
+description = "Crowbank Kennels & Cattery Intranet Application"
+readme = "README.md"
+authors = [{name = "Crowbank Team"}]
+requires-python = ">=3.11"
+dependencies = [
+    # Flask and extensions
+    "Flask==3.0.0",
+    "Flask-SQLAlchemy==3.1.1",
+    "Flask-Migrate==4.0.5",
+    "python-dotenv==1.0.0",
+    
+    # Database
+    "SQLAlchemy==2.0.25",
+    "psycopg2-binary==2.9.9",
+    "alembic==1.12.1",
+    
+    # Security
+    "Flask-Login==0.6.3",
+    "Flask-WTF==1.2.1",
+    "WTForms==3.1.0",
+    "email-validator>=2.1.1",
+    
+    # Utils
+    "python-dateutil==2.8.2",
+    "Pillow>=10.2.0",
+    
+    # Deployment
+    "gunicorn==21.2.0",
+    
+    # Data Migration
+    "pyyaml==6.0.1",
+    "psycopg==3.1.16",
+    "tqdm==4.66.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    # Testing
+    "pytest==7.4.3",
+    "pytest-flask==1.3.0",
+    
+    # Code quality
+    "ruff",
+    "mypy",
+    
+    # Type stubs for better type checking
+    "types-python-dateutil",
+    "types-PyYAML",
+    "types-tqdm",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app", "migration", "config"]
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=7.4.3",
+    "pytest-flask>=1.3.0",
+    "ruff>=0.1.0",
+    "mypy>=1.0.0",
+    "types-python-dateutil",
+    "types-PyYAML", 
+    "types-tqdm",
+]
+
+[tool.ruff]
+# Set the maximum line length to 88 (Black's default)
+line-length = 88
+target-version = "py311"
+
+# Include additional file types
+extend-include = ["*.pyi"]
+
+# Exclude directories
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+    "migrations/versions",  # Exclude Alembic migration files
+    "legacy",  # Exclude legacy code
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+# Ignore legacy code directory during collection
+norecursedirs = ["legacy", ".git", ".venv", "node_modules"]
+
+[tool.ruff.lint]
+# Enable these rule sets:
+# E/W: pycodestyle errors and warnings
+# F: Pyflakes
+# I: isort (import sorting)
+# N: pep8-naming
+# UP: pyupgrade (Python version upgrade syntax)
+# B: flake8-bugbear (common bugs)
+# C4: flake8-comprehensions
+# SIM: flake8-simplify
+# RUF: Ruff-specific rules
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings  
+    "F",    # Pyflakes
+    "I",    # isort
+    "N",    # pep8-naming
+    "UP",   # pyupgrade
+    "B",    # flake8-bugbear
+    "C4",   # flake8-comprehensions
+    "SIM",  # flake8-simplify
+    "RUF",  # Ruff-specific rules
+]
+
+# Ignore specific rules that are too strict for Flask projects
+ignore = [
+    "E501",   # Line too long (handled by line-length setting)
+    "N806",   # Variable in function should be lowercase (conflicts with SQLAlchemy)
+    "N802",   # Function name should be lowercase (conflicts with Flask view functions)
+    "B008",   # Do not perform function calls in argument defaults (common in Flask)
+    "RUF012", # Mutable class attributes should be annotated with `ClassVar`
+]
+
+# Allow unused variables when they start with an underscore
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.lint.per-file-ignores]
+# Ignore import organization in __init__.py files
+"__init__.py" = ["F401", "F403"]
+# Ignore some rules in test files
+"test_*.py" = ["N806", "N802", "SIM117"]
+"tests/*.py" = ["N806", "N802", "SIM117"]
+
+[tool.ruff.lint.isort]
+# Use "from ... import ..." for these modules
+known-first-party = ["app", "migration", "config"]
+# Group Flask and SQLAlchemy imports
+known-third-party = ["flask", "sqlalchemy", "alembic", "wtforms"]
+
+[tool.ruff.format]
+# Use double quotes for strings
+quote-style = "double"
+# Indent with 4 spaces
+indent-style = "space"
+# Respect magic trailing comma
+skip-magic-trailing-comma = false
+# Automatically detect line ending
+line-ending = "auto"
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false  # Start lenient, can tighten later
+disallow_incomplete_defs = false
+check_untyped_defs = true
+disallow_untyped_decorators = false  # Flask decorators are often untyped
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+
+# SQLAlchemy plugin
+plugins = ["sqlalchemy.ext.mypy.plugin"]
+
+# Ignore missing imports for some third-party packages
+[[tool.mypy.overrides]]
+module = [
+    "psycopg2.*",
+    "pyodbc.*",
+    "tqdm.*",
+    "PIL.*",
+    "gunicorn.*",
+]
+ignore_missing_imports = true

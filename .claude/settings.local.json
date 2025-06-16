@@ -25,7 +25,22 @@
       "Bash(docker-compose down:*)",
       "Bash(docker-compose up:*)",
       "Bash(docker rm:*)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(env)",
+      "WebFetch(domain:docs.anthropic.com)",
+      "Bash(claude mcp:*)",
+      "Bash(npx:*)",
+      "WebFetch(domain:neon.com)",
+      "Bash(alembic current:*)",
+      "Bash(source:*)",
+      "Bash(grep:*)",
+      "Bash(alembic:*)",
+      "Bash(rm:*)",
+      "Bash(export PATH=\"$HOME/.local/bin:$PATH\")",
+      "Bash(uv:*)",
+      "Bash(chmod:*)",
+      "Bash(./dev.sh:*)",
+      "Bash(git add:*)"
     ],
     "deny": []
   }

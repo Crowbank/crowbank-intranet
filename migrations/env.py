@@ -39,8 +39,8 @@ target_metadata = Base.metadata
 # Alembic Config
 config = context.config
 
-# Hardcode database connection information for reliable migrations
-_db_url = "postgresql://crowbank:ZhV8Pk521j1Z@192.168.0.201:54320/crowbank"
+# Use Neon database connection for migrations
+_db_url = "postgresql://neondb_owner:npg_Bd3vtxJPN9Sy@ep-lingering-smoke-ab6cuko3-pooler.eu-west-2.aws.neon.tech/crowbank?sslmode=require"
 config.set_main_option("sqlalchemy.url", _db_url)
 
 # Logging

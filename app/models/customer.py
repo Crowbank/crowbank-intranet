@@ -1,11 +1,23 @@
 import enum
-from sqlalchemy import Column, Integer, String, Text, ForeignKey, Enum, Boolean, Numeric, UniqueConstraint, Index
-from sqlalchemy.orm import relationship, validates
+
 import sqlalchemy as sa
+from sqlalchemy import (
+    Boolean,
+    Column,
+    Enum,
+    ForeignKey,
+    Integer,
+    Numeric,
+    String,
+    Text,
+    UniqueConstraint,
+)
+from sqlalchemy.orm import relationship, validates
 
 from .base import Base
-from .vet import Vet
 from .mixins import AddressMixin
+from .vet import Vet
+
 
 # Enum for Contact Roles
 class ContactRole(str, enum.Enum):
@@ -13,12 +25,13 @@ class ContactRole(str, enum.Enum):
     SECONDARY = "secondary"
     EMERGENCY = "emergency"
 
+
 # Association Table for Customer-Contact Many-to-Many
 class CustomerContact(Base):
-    __tablename__ = 'customer_contacts'
+    __tablename__ = "customer_contacts"
 
-    customer_id = Column(Integer, ForeignKey('customers.id'), primary_key=True)
-    contact_id = Column(Integer, ForeignKey('contacts.id'), primary_key=True)
+    customer_id = Column(Integer, ForeignKey("customers.id"), primary_key=True)
+    contact_id = Column(Integer, ForeignKey("contacts.id"), primary_key=True)
     role = Column(Enum(ContactRole), nullable=False)
     relation_type = Column(String(50), nullable=True)  # e.g., 'father', 'friend'
 
@@ -26,32 +39,35 @@ class CustomerContact(Base):
     contact = relationship("Contact", back_populates="customer_associations")
 
     # Add validation to ensure a contact can only be PRIMARY for one customer
-    @validates('role')
+    @validates("role")
     def validate_primary_role(self, key, role):
         if role == ContactRole.PRIMARY:
             # Check if this contact is already PRIMARY for another customer
             existing = self.contact.primary_customer if self.contact else None
             if existing and existing.id != self.customer_id:
-                raise ValueError(f"Contact is already a PRIMARY contact for customer {existing.id}")
+                raise ValueError(
+                    f"Contact is already a PRIMARY contact for customer {existing.id}"
+                )
         return role
 
     __table_args__ = (
         # This ensures a contact can only have one role per customer
-        UniqueConstraint('customer_id', 'contact_id', name='uix_customer_contact'),
+        UniqueConstraint("customer_id", "contact_id", name="uix_customer_contact"),
     )
+
 
 # Contact Model (Individual Person)
 class Contact(Base):
-    __tablename__ = 'contacts'
+    __tablename__ = "contacts"
 
     id = Column(Integer, primary_key=True)
     legacy_contact_no = Column(Integer, nullable=True, unique=True)
     first_name = Column(String(100), nullable=False)
     last_name = Column(String(100), nullable=False)
-    phone_number = Column(String(30), nullable=True)          # primary phone (mobile preferred)
-    phone_alt = Column(String(30), nullable=True)             # secondary/landline
-    email_address = Column(String(255), nullable=True)        # primary email
-    email_alt = Column(String(255), nullable=True)            # secondary/work email
+    phone_number = Column(String(30), nullable=True)  # primary phone (mobile preferred)
+    phone_alt = Column(String(30), nullable=True)  # secondary/landline
+    email_address = Column(String(255), nullable=True)  # primary email
+    email_alt = Column(String(255), nullable=True)  # secondary/work email
     notes = Column(Text, nullable=True)
 
     customer_associations = relationship("CustomerContact", back_populates="contact")
@@ -67,15 +83,21 @@ class Contact(Base):
     @property
     def secondary_customers(self):
         """Get all customers for which this contact is a SECONDARY contact."""
-        return [assoc.customer for assoc in self.customer_associations 
-                if assoc.role == ContactRole.SECONDARY]
+        return [
+            assoc.customer
+            for assoc in self.customer_associations
+            if assoc.role == ContactRole.SECONDARY
+        ]
 
     @property
     def emergency_customers(self):
         """Get all customers for which this contact is an EMERGENCY contact."""
-        return [assoc.customer for assoc in self.customer_associations 
-                if assoc.role == ContactRole.EMERGENCY]
-    
+        return [
+            assoc.customer
+            for assoc in self.customer_associations
+            if assoc.role == ContactRole.EMERGENCY
+        ]
+
     @property
     def full_name(self):
         """Get the full name of the contact."""
@@ -84,9 +106,10 @@ class Contact(Base):
     def __repr__(self):
         return f"<Contact(id={self.id}, name='{self.full_name}')>"
 
+
 # Customer Model (Household)
 class Customer(Base, AddressMixin):
-    __tablename__ = 'customers'
+    __tablename__ = "customers"
 
     id = Column(Integer, primary_key=True)
     legacy_cust_no = Column(Integer, nullable=True, unique=True)
@@ -101,24 +124,34 @@ class Customer(Base, AddressMixin):
     stripe_id = Column(String(50), nullable=True)
 
     # Default Vet (FK - linking to Vet model)
-    default_vet_id = Column(Integer, ForeignKey('vets.id'), nullable=True)
+    default_vet_id = Column(Integer, ForeignKey("vets.id"), nullable=True)
     default_vet = relationship(Vet, back_populates="customers")
 
     # Relationship to the association table
-    contact_associations = relationship("CustomerContact", back_populates="customer", cascade="all, delete-orphan")
-    
+    contact_associations = relationship(
+        "CustomerContact", back_populates="customer", cascade="all, delete-orphan"
+    )
+
     # Relationship to pets
     pets = relationship("Pet", back_populates="owner")
-    
+
     # Relationship to bookings
     bookings = relationship("Booking", back_populates="customer")
-    
+
     # Relationship to form submissions
-    form_submissions = relationship("FormSubmission", foreign_keys="FormSubmission.customer_id", back_populates="customer")
+    form_submissions = relationship(
+        "FormSubmission",
+        foreign_keys="FormSubmission.customer_id",
+        back_populates="customer",
+    )
 
     @property
     def primary_contacts(self):
-        return [assoc.contact for assoc in self.contact_associations if assoc.role == ContactRole.PRIMARY]
+        return [
+            assoc.contact
+            for assoc in self.contact_associations
+            if assoc.role == ContactRole.PRIMARY
+        ]
 
     @property
     def primary_contact(self):
@@ -128,12 +161,20 @@ class Customer(Base, AddressMixin):
 
     @property
     def secondary_contacts(self):
-        return [assoc.contact for assoc in self.contact_associations if assoc.role == ContactRole.SECONDARY]
+        return [
+            assoc.contact
+            for assoc in self.contact_associations
+            if assoc.role == ContactRole.SECONDARY
+        ]
 
     @property
     def emergency_contacts(self):
-        return [assoc.contact for assoc in self.contact_associations if assoc.role == ContactRole.EMERGENCY]
-        
+        return [
+            assoc.contact
+            for assoc in self.contact_associations
+            if assoc.role == ContactRole.EMERGENCY
+        ]
+
     @property
     def display_name(self):
         """Return a display name for the customer based on primary contact."""
@@ -143,27 +184,27 @@ class Customer(Base, AddressMixin):
 
     def __repr__(self):
         return f"<Customer(id={self.id}, name='{self.display_name}', legacy_cust_no={self.legacy_cust_no})>"
-        
+
     def get_form_submissions(self, form_type=None):
         """
         Get form submissions for this customer, optionally filtered by form type.
-        
+
         Args:
             form_type: Optional FormType enum value to filter by
-            
+
         Returns:
             List of FormSubmission instances
         """
         if form_type:
             return [s for s in self.form_submissions if s.template.type == form_type]
-        return self.form_submissions 
+        return self.form_submissions
 
     __table_args__ = (
         # Unique index on stripe_id, but only when it is not null and not empty
         sa.Index(
-            'ix_customers_stripe_id_unique',
-            'stripe_id',
+            "ix_customers_stripe_id_unique",
+            "stripe_id",
             unique=True,
-            postgresql_where=sa.text("stripe_id IS NOT NULL AND stripe_id <> ''")
+            postgresql_where=sa.text("stripe_id IS NOT NULL AND stripe_id <> ''"),
         ),
-    ) 
+    )

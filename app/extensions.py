@@ -7,14 +7,15 @@ Extensions are initialized in app/__init__.py using init_app().
 
 # Database and ORM
 from flask_sqlalchemy import SQLAlchemy
+
 db = SQLAlchemy()
 
 # Migrations
 from flask_migrate import Migrate
+
 migrate = Migrate()
 
 # Cloud Storage
-from app.utils.cloud_storage import cloud_storage
 
 # Blueprints and extension instances will be added as needed:
 # from flask_login import LoginManager
@@ -22,5 +23,5 @@ from app.utils.cloud_storage import cloud_storage
 #
 # from flask_mail import Mail
 # mail = Mail()
-# 
-# etc. 
+#
+# etc.
