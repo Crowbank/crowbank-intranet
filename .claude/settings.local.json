@@ -40,7 +40,9 @@
       "Bash(uv:*)",
       "Bash(chmod:*)",
       "Bash(./dev.sh:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ],
     "deny": []
   }

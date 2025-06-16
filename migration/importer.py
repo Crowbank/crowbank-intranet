@@ -25,8 +25,11 @@ IMPORT_PLAN = [
     ("v_customers", "customers", {"default_vet_id": "vets"}, "legacy_cust_no"),
     ("v_contacts", "contacts", {}, "legacy_contact_no"),
     ("v_customer_contacts", "customer_contacts", {}, None),  # Handle FKs in custom code
-    ("v_boarding_runs", "boarding_runs", {}, "legacy_run_no"),  # Handle run_type_id separately
+    ("v_run_types", "run_types", {}, "run_type_legacy_no"),  # Run types - handle species_id separately
+    ("v_boarding_runs", "boarding_runs", {}, "legacy_run_no"),  # Handle run_type_id FK separately
     ("v_services", "services", {}, "legacy_service_id"),  # Service catalog import
+    ("v_pets", "pets", {"owner_id": "customers", "species_id": "species", "breed_id": "breeds", "vet_id": "vets"}, "legacy_pet_no"),  # Pets with FK mappings
+    ("v_bookings", "bookings", {"customer_id": "customers"}, "legacy_bk_no"),  # Bookings with customer FK
 ]
 
 # ---------------------------------------------------------------------------
@@ -56,9 +59,115 @@ def translate_fk(record: dict, fk_map: dict[str, str]):
             try:
                 record[col] = lookup[lookup_key][legacy_val]
             except KeyError as exc:
-                raise KeyError(
-                    f"No lookup value for {lookup_key}[{legacy_val}] while populating {col}"
-                ) from exc
+                # Handle missing foreign keys gracefully for certain cases
+                if col == 'owner_id' and lookup_key == 'customers':
+                    print(f"⚠️  Orphaned pet: missing customer {legacy_val}, setting owner_id to NULL")
+                    record[col] = None
+                elif col == 'vet_id' and lookup_key == 'vets':
+                    print(f"⚠️  Pet with missing vet {legacy_val}, setting vet_id to NULL")
+                    record[col] = None
+                elif col == 'species_id' and lookup_key == 'species':
+                    print(f"⚠️  Pet with missing species {legacy_val}, setting species_id to NULL")
+                    record[col] = None
+                elif col == 'breed_id' and lookup_key == 'breeds':
+                    print(f"⚠️  Pet with missing breed {legacy_val}, setting breed_id to NULL")
+                    record[col] = None
+                else:
+                    raise KeyError(
+                        f"No lookup value for {lookup_key}[{legacy_val}] while populating {col}"
+                    ) from exc
+
+
+def translate_run_type(record: dict):
+    """Special handling for run_type records to map species_id FK correctly."""
+    if 'species_id' in record and 'species' in lookup:
+        legacy_species_id = record['species_id']
+        if legacy_species_id is not None:
+            # Map legacy species_id to new species id via lookup table
+            record['species_id'] = lookup['species'].get(legacy_species_id, None)
+        else:
+            record['species_id'] = None
+
+
+def translate_pet(record: dict):
+    """Special handling for pet records to fix null values."""
+    # Fix null neutered values (required field)
+    if 'neutered' in record and record['neutered'] is None:
+        record['neutered'] = False  # Default to False for null values
+        
+    # Fix null deceased values (required field) 
+    if 'deceased' in record and record['deceased'] is None:
+        record['deceased'] = False  # Default to False for null values
+        
+    # Fix null friends_allowed values (required field)
+    if 'friends_allowed' in record and record['friends_allowed'] is None:
+        record['friends_allowed'] = False  # Default to False for null values
+        
+    # Fix null daycare_approved values (required field)
+    if 'daycare_approved' in record and record['daycare_approved'] is None:
+        record['daycare_approved'] = False  # Default to False for null values
+
+
+def translate_booking(record: dict):
+    """Special handling for booking records to convert is_daycare 0/1 to boolean and fix timestamps."""
+    if 'is_daycare' in record:
+        # Convert 0/1 to boolean
+        record['is_daycare'] = bool(record['is_daycare']) if record['is_daycare'] is not None else False
+    
+    # Map legacy status values to valid enum values (uppercase)
+    if 'status' in record and record['status'] is not None:
+        status_mapping = {
+            'checked_in': 'CHECKED_IN',
+            'checked_out': 'CHECKED_OUT', 
+            'cancelled': 'CANCELLED',
+            'confirmed': 'CONFIRMED',
+            'pending': 'PENDING',
+            'no_show': 'NO_SHOW',
+            'standby': 'STANDBY',
+            # Add other legacy mappings as needed
+        }
+        legacy_status = record['status'].lower()
+        if legacy_status in status_mapping:
+            record['status'] = status_mapping[legacy_status]
+        else:
+            print(f"⚠️  Unknown booking status '{record['status']}', mapping to 'PENDING'")
+            record['status'] = 'PENDING'
+    
+    # Convert time-only values to proper timestamps for check-in/check-out
+    from datetime import datetime, time, date
+    
+    # Fix checked_in_at: combine with arrival_date if it's a time object
+    if 'checked_in_at' in record and record['checked_in_at'] is not None:
+        if isinstance(record['checked_in_at'], time):
+            # Combine time with arrival_date to create datetime
+            arrival_date = record.get('arrival_date')
+            if isinstance(arrival_date, date):
+                record['checked_in_at'] = datetime.combine(arrival_date, record['checked_in_at'])
+            else:
+                # If no valid arrival_date, set to None
+                record['checked_in_at'] = None
+    
+    # Fix checked_out_at: combine with departure_date if it's a time object
+    if 'checked_out_at' in record and record['checked_out_at'] is not None:
+        if isinstance(record['checked_out_at'], time):
+            # Combine time with departure_date to create datetime
+            departure_date = record.get('departure_date')
+            if isinstance(departure_date, date):
+                record['checked_out_at'] = datetime.combine(departure_date, record['checked_out_at'])
+            else:
+                # If no valid departure_date, set to None
+                record['checked_out_at'] = None
+
+
+def translate_boarding_run(record: dict):
+    """Special handling for boarding run records to map legacy_runtype_no to run_type_id FK."""
+    if 'legacy_runtype_no' in record:
+        legacy_runtype = record.pop('legacy_runtype_no', None)
+        if legacy_runtype is not None and 'run_types' in lookup:
+            # Map legacy runtype number to run_type_id via lookup table
+            record['run_type_id'] = lookup['run_types'].get(legacy_runtype, None)
+        else:
+            record['run_type_id'] = None
 
 
 def import_table(view: str, dest_name: str, fk_map: dict[str, str], pk_col: str, *, force: bool = False):
@@ -94,6 +203,22 @@ def import_table(view: str, dest_name: str, fk_map: dict[str, str], pk_col: str,
 
         if fk_map:
             translate_fk(rec, fk_map)
+        
+        # Special handling for run types
+        if dest_name == "run_types":
+            translate_run_type(rec)
+        
+        # Special handling for boarding runs
+        if dest_name == "boarding_runs":
+            translate_boarding_run(rec)
+        
+        # Special handling for pets
+        if dest_name == "pets":
+            translate_pet(rec)
+        
+        # Special handling for bookings
+        if dest_name == "bookings":
+            translate_booking(rec)
             
         # Special case for customer_contacts to map legacy_contact_no to contact_id
         if dest_name == "customer_contacts" and "legacy_contact_no" in rec and "contact_id" in dest_tbl.c:
@@ -203,11 +328,51 @@ def main(argv: list[str] | None = None):  # pragma: no cover
     # Preload run_types mappings for boarding_runs FK resolution
     if selected_tables is None or 'boarding_runs' in selected_tables:
         with _engine_dst.connect() as conn:
-            # Load run_types mappings (assuming legacy_run_type_no exists)
-            run_type_rows = conn.execute(sa.text("SELECT code, id FROM run_types")).all()
-            # Map by code since run_types might not have legacy IDs
-            lookup['run_types'] = {row[0]: row[1] for row in run_type_rows}
-            print(f"Preloaded {len(lookup['run_types'])} run_type mappings")
+            # Load run_types mappings (run_type_legacy_no -> id)
+            try:
+                run_type_rows = conn.execute(sa.text("SELECT run_type_legacy_no, id FROM run_types WHERE run_type_legacy_no IS NOT NULL")).all()
+                lookup['run_types'] = {row[0]: row[1] for row in run_type_rows}
+                print(f"Preloaded {len(lookup['run_types'])} run_type mappings")
+            except Exception as e:
+                # If run_types table is empty or doesn't exist yet, we'll populate it first
+                print(f"Run types not yet loaded: {e}")
+                lookup['run_types'] = {}
+    
+    # Preload FK mappings for pets migration
+    if selected_tables is None or 'pets' in selected_tables or 'bookings' in selected_tables:
+        with _engine_dst.connect() as conn:
+            # Load customers mapping if not already loaded
+            if 'customers' not in lookup or not lookup['customers']:
+                customer_rows = conn.execute(sa.text("SELECT legacy_cust_no, id FROM customers WHERE legacy_cust_no IS NOT NULL")).all()
+                lookup['customers'] = {row[0]: row[1] for row in customer_rows}
+                print(f"Preloaded {len(lookup['customers'])} customer mappings for pets/bookings")
+            
+            # Load species mappings
+            try:
+                species_rows = conn.execute(sa.text("SELECT legacy_spec_no, id FROM species WHERE legacy_spec_no IS NOT NULL")).all()
+                lookup['species'] = {row[0]: row[1] for row in species_rows}
+                print(f"Preloaded {len(lookup['species'])} species mappings")
+            except Exception as e:
+                print(f"Could not load species mappings: {e}")
+                lookup['species'] = {}
+            
+            # Load vets mappings
+            try:
+                vet_rows = conn.execute(sa.text("SELECT legacy_vet_no, id FROM vets WHERE legacy_vet_no IS NOT NULL")).all()
+                lookup['vets'] = {row[0]: row[1] for row in vet_rows}
+                print(f"Preloaded {len(lookup['vets'])} vet mappings")
+            except Exception as e:
+                print(f"Could not load vet mappings: {e}")
+                lookup['vets'] = {}
+            
+            # Load breeds mappings
+            try:
+                breed_rows = conn.execute(sa.text("SELECT legacy_breed_no, id FROM breeds WHERE legacy_breed_no IS NOT NULL")).all()
+                lookup['breeds'] = {row[0]: row[1] for row in breed_rows}
+                print(f"Preloaded {len(lookup['breeds'])} breed mappings")
+            except Exception as e:
+                print(f"Could not load breed mappings: {e}")
+                lookup['breeds'] = {}
 
     for view, dest_tbl, fk_map, pk_col in IMPORT_PLAN:
         if selected_tables is not None and dest_tbl.lower() not in selected_tables:

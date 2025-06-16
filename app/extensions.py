@@ -16,6 +16,9 @@ from flask_migrate import Migrate
 migrate = Migrate()
 
 # Cloud Storage
+from app.utils.cloud_storage import CloudStorageService
+
+cloud_storage = CloudStorageService()
 
 # Blueprints and extension instances will be added as needed:
 # from flask_login import LoginManager

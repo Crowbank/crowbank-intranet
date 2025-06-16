@@ -24,6 +24,7 @@ legacy_database:
 sqlalchemy:
   echo: true  # Log SQL queries
   track_modifications: true
+  database_uri: "postgresql+psycopg://neondb_owner:npg_Bd3vtxJPN9Sy@ep-lingering-smoke-ab6cuko3-pooler.eu-west-2.aws.neon.tech/crowbank?sslmode=require"
 
 # Logging
 logging:
