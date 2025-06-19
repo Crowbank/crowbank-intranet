@@ -8,9 +8,8 @@ config = {
     "DEBUG": True,
     "TESTING": False,
     
-    # Database settings (with placeholder password that will be overridden)
-    "SQLALCHEMY_DATABASE_URI": "postgresql://crowbank:ZhV8Pk521j1Z@192.168.0.201:54320/crowbank",
-    "SQLALCHEMY_ECHO": True,  # Log SQL queries
+    # Database URI will be loaded from YAML configuration
+    # SQLAlchemy echo setting will be loaded from YAML configuration
     
     # Logging
     "LOG_LEVEL": "DEBUG",

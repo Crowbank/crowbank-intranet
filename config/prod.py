@@ -14,8 +14,7 @@ config = {
     "REMEMBER_COOKIE_SECURE": True,
     "REMEMBER_COOKIE_HTTPONLY": True,
     
-    # Production performance settings
-    "SQLALCHEMY_ECHO": False,
+    # SQLAlchemy echo setting will be loaded from YAML configuration
     "SQLALCHEMY_TRACK_MODIFICATIONS": False,
     "SQLALCHEMY_ENGINE_OPTIONS": {
         "pool_size": 10,

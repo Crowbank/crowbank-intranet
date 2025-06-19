@@ -30,6 +30,8 @@ IMPORT_PLAN = [
     ("v_services", "services", {}, "legacy_service_id"),  # Service catalog import
     ("v_pets", "pets", {"owner_id": "customers", "species_id": "species", "breed_id": "breeds", "vet_id": "vets"}, "legacy_pet_no"),  # Pets with FK mappings
     ("v_bookings", "bookings", {"customer_id": "customers"}, "legacy_bk_no"),  # Bookings with customer FK
+    ("v_booking_pets", "booking_pets", {}, None),  # Booking-Pet associations (handled manually)
+    ("v_booking_allocations", "daily_allocations", {}, None),  # Daily allocations with FK mappings
 ]
 
 # ---------------------------------------------------------------------------
@@ -159,6 +161,40 @@ def translate_booking(record: dict):
                 record['checked_out_at'] = None
 
 
+def translate_booking_pets(record: dict):
+    """Special handling for booking_pets records to map legacy FKs and set defaults."""
+    # Map legacy_bk_no to booking_id
+    if 'legacy_bk_no' in record:
+        legacy_booking_id = record.pop('legacy_bk_no', None)
+        if legacy_booking_id is not None and 'bookings' in lookup:
+            try:
+                record['booking_id'] = lookup['bookings'][legacy_booking_id]
+            except KeyError:
+                print(f"⚠️  Booking-Pet with missing booking {legacy_booking_id}, skipping")
+                return None
+        else:
+            print(f"⚠️  Booking-Pet with no booking_id, skipping")
+            return None
+    
+    # Map legacy_pet_no to pet_id
+    if 'legacy_pet_no' in record:
+        legacy_pet_id = record.pop('legacy_pet_no', None)
+        if legacy_pet_id is not None and 'pets' in lookup:
+            try:
+                record['pet_id'] = lookup['pets'][legacy_pet_id]
+            except KeyError:
+                print(f"⚠️  Booking-Pet with missing pet {legacy_pet_id}, skipping")
+                return None
+        else:
+            print(f"⚠️  Booking-Pet with no pet_id, skipping")
+            return None
+    
+    # Set default values for required fields that aren't in the source view
+    record['requires_medication'] = False
+    
+    return record
+
+
 def translate_boarding_run(record: dict):
     """Special handling for boarding run records to map legacy_runtype_no to run_type_id FK."""
     if 'legacy_runtype_no' in record:
@@ -168,6 +204,50 @@ def translate_boarding_run(record: dict):
             record['run_type_id'] = lookup['run_types'].get(legacy_runtype, None)
         else:
             record['run_type_id'] = None
+
+
+def translate_daily_allocations(record: dict):
+    """Special handling for daily allocations to map legacy FKs."""
+    # Map legacy_bk_no to booking_id
+    if 'legacy_bk_no' in record:
+        legacy_booking_id = record.pop('legacy_bk_no', None)
+        if legacy_booking_id is not None and 'bookings' in lookup:
+            try:
+                record['booking_id'] = lookup['bookings'][legacy_booking_id]
+            except KeyError:
+                print(f"⚠️  Daily allocation with missing booking {legacy_booking_id}, skipping")
+                return None
+        else:
+            print(f"⚠️  Daily allocation with no booking_id, skipping")
+            return None
+    
+    # Map legacy_pet_no to pet_id
+    if 'legacy_pet_no' in record:
+        legacy_pet_id = record.pop('legacy_pet_no', None)
+        if legacy_pet_id is not None and 'pets' in lookup:
+            try:
+                record['pet_id'] = lookup['pets'][legacy_pet_id]
+            except KeyError:
+                print(f"⚠️  Daily allocation with missing pet {legacy_pet_id}, skipping")
+                return None
+        else:
+            print(f"⚠️  Daily allocation with no pet_id, skipping")
+            return None
+    
+    # Map legacy_run_no to boarding_run_id
+    if 'legacy_run_no' in record:
+        legacy_run_id = record.pop('legacy_run_no', None)
+        if legacy_run_id is not None and 'boarding_runs' in lookup:
+            try:
+                record['boarding_run_id'] = lookup['boarding_runs'][legacy_run_id]
+            except KeyError:
+                print(f"⚠️  Daily allocation with missing run {legacy_run_id}, skipping")
+                return None
+        else:
+            print(f"⚠️  Daily allocation with no boarding_run_id, skipping")
+            return None
+    
+    return record
 
 
 def import_table(view: str, dest_name: str, fk_map: dict[str, str], pk_col: str, *, force: bool = False):
@@ -184,11 +264,19 @@ def import_table(view: str, dest_name: str, fk_map: dict[str, str], pk_col: str,
     legacy_ids: list[int] = []
 
     # Build map of already-imported legacy ids so reruns are safe / idempotent.
-    if pk_col and pk_col in dest_tbl.c:
-        with _engine_dst.connect() as conn:
-            existing_rows = conn.execute(sa.select(dest_tbl.c[pk_col], dest_tbl.c.id)).all()
-        existing_map = {row[0]: row[1] for row in existing_rows}
-        lookup[dest_name].update(existing_map)
+    if pk_col:
+        # Handle special case where source column name differs from destination column name
+        dest_pk_col = pk_col
+        if dest_name == "bookings" and pk_col == "legacy_bk_no":
+            dest_pk_col = "legacy_booking_no"
+            
+        if dest_pk_col in dest_tbl.c:
+            with _engine_dst.connect() as conn:
+                existing_rows = conn.execute(sa.select(dest_tbl.c[dest_pk_col], dest_tbl.c.id)).all()
+            existing_map = {row[0]: row[1] for row in existing_rows}
+            lookup[dest_name].update(existing_map)
+        else:
+            existing_map = {}
     else:
         existing_map = {}
 
@@ -219,6 +307,21 @@ def import_table(view: str, dest_name: str, fk_map: dict[str, str], pk_col: str,
         # Special handling for bookings
         if dest_name == "bookings":
             translate_booking(rec)
+            # Map legacy_bk_no to legacy_booking_no for the database
+            if 'legacy_bk_no' in rec:
+                rec['legacy_booking_no'] = rec.pop('legacy_bk_no')
+        
+        # Special handling for booking_pets to map legacy IDs
+        if dest_name == "booking_pets":
+            result = translate_booking_pets(rec)
+            if result is None:
+                continue  # Skip this record
+                
+        # Special handling for daily_allocations to map legacy IDs
+        if dest_name == "daily_allocations":
+            result = translate_daily_allocations(rec)
+            if result is None:
+                continue  # Skip this record
             
         # Special case for customer_contacts to map legacy_contact_no to contact_id
         if dest_name == "customer_contacts" and "legacy_contact_no" in rec and "contact_id" in dest_tbl.c:
@@ -338,8 +441,8 @@ def main(argv: list[str] | None = None):  # pragma: no cover
                 print(f"Run types not yet loaded: {e}")
                 lookup['run_types'] = {}
     
-    # Preload FK mappings for pets migration
-    if selected_tables is None or 'pets' in selected_tables or 'bookings' in selected_tables:
+    # Preload FK mappings for pets migration, booking_pets association, and daily_allocations
+    if selected_tables is None or 'pets' in selected_tables or 'bookings' in selected_tables or 'booking_pets' in selected_tables or 'daily_allocations' in selected_tables:
         with _engine_dst.connect() as conn:
             # Load customers mapping if not already loaded
             if 'customers' not in lookup or not lookup['customers']:
@@ -373,6 +476,33 @@ def main(argv: list[str] | None = None):  # pragma: no cover
             except Exception as e:
                 print(f"Could not load breed mappings: {e}")
                 lookup['breeds'] = {}
+            
+            # Load pets mappings (needed for booking_pets)
+            try:
+                pets_rows = conn.execute(sa.text("SELECT legacy_pet_no, id FROM pets WHERE legacy_pet_no IS NOT NULL")).all()
+                lookup['pets'] = {row[0]: row[1] for row in pets_rows}
+                print(f"Preloaded {len(lookup['pets'])} pets mappings")
+            except Exception as e:
+                print(f"Could not load pets mappings: {e}")
+                lookup['pets'] = {}
+            
+            # Load bookings mappings (needed for booking_pets and daily_allocations)
+            try:
+                booking_rows = conn.execute(sa.text("SELECT legacy_booking_no, id FROM bookings WHERE legacy_booking_no IS NOT NULL")).all()
+                lookup['bookings'] = {row[0]: row[1] for row in booking_rows}
+                print(f"Preloaded {len(lookup['bookings'])} bookings mappings")
+            except Exception as e:
+                print(f"Could not load bookings mappings: {e}")
+                lookup['bookings'] = {}
+            
+            # Load boarding_runs mappings (needed for daily_allocations)
+            try:
+                boarding_run_rows = conn.execute(sa.text("SELECT legacy_run_no, id FROM boarding_runs WHERE legacy_run_no IS NOT NULL")).all()
+                lookup['boarding_runs'] = {row[0]: row[1] for row in boarding_run_rows}
+                print(f"Preloaded {len(lookup['boarding_runs'])} boarding_runs mappings")
+            except Exception as e:
+                print(f"Could not load boarding_runs mappings: {e}")
+                lookup['boarding_runs'] = {}
 
     for view, dest_tbl, fk_map, pk_col in IMPORT_PLAN:
         if selected_tables is not None and dest_tbl.lower() not in selected_tables:

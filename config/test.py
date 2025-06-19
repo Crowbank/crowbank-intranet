@@ -9,9 +9,8 @@ config = {
     "TESTING": True,
     "SERVER_NAME": "localhost",
     
-    # Database settings
-    "SQLALCHEMY_DATABASE_URI": "postgresql://crowbank:password@localhost/crowbank_test",
-    "SQLALCHEMY_ECHO": False,  # Don't log SQL queries in tests
+    # Database URI will be loaded from YAML configuration
+    # SQLAlchemy echo setting will be loaded from YAML configuration
     
     # Testing settings
     "PRESERVE_CONTEXT_ON_EXCEPTION": False,
