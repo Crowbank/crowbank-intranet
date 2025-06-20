@@ -10,11 +10,21 @@ import os
 import sys
 
 # Add the project root directory to the path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from app.database import init_db
+from app import create_app
+from app.extensions import db
+
+
+def init_db():
+    """Initialize the database, creating all tables."""
+    app = create_app()
+    with app.app_context():
+        db.create_all()
+
 
 if __name__ == "__main__":
     print("Initializing database...")
     init_db()
-    print("Database initialized successfully.") 
+    print("Database initialized successfully.")
+

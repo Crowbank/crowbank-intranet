@@ -58,20 +58,28 @@ def load_yaml_file(file_path: str) -> dict[str, Any]:
 
     Returns:
         Dictionary with config data, empty dict if file not found
+
+    Raises:
+        ValueError: If required configuration file is missing or invalid
     """
     try:
         with open(file_path) as file:
             config_data = yaml.safe_load(file) or {}
             return config_data
-    except FileNotFoundError:
-        logger.warning(f"Config file not found: {file_path}")
-        return {}
+    except FileNotFoundError as e:
+        # Only warn for optional files (secret.yaml), error for required files
+        if "secret.yaml" in file_path:
+            logger.warning(f"Optional config file not found: {file_path}")
+            return {}
+        else:
+            logger.error(f"Required config file not found: {file_path}")
+            raise ValueError(f"Required configuration file missing: {file_path}") from e
     except yaml.YAMLError as e:
         logger.error(f"Error parsing YAML in {file_path}: {e}")
-        return {}
+        raise ValueError(f"Invalid YAML configuration in {file_path}: {e}") from e
     except Exception as e:
         logger.error(f"Error loading config file {file_path}: {e}")
-        return {}
+        raise ValueError(f"Failed to load configuration from {file_path}: {e}") from e
 
 
 def flatten_dict(
@@ -154,6 +162,15 @@ def load_config(env: str | None = None) -> dict[str, Any]:
             config["sqlalchemy"]["database_uri"] = (
                 f"postgresql://{db['user']}:{db['password']}@{db['host']}{port_str}/{db['name']}"
             )
+        elif any(k in db for k in ["user", "password", "host", "name"]):
+            # Some but not all database config present - warn user
+            missing_keys = [
+                k for k in ["user", "password", "host", "name"] if k not in db
+            ]
+            logger.warning(
+                f"Incomplete database configuration. Missing keys: {missing_keys}"
+            )
+            logger.warning("Database connection will not be available.")
 
     # 7. Create a Flask-style flattened config for compatibility
     flask_config = flatten_dict(config)

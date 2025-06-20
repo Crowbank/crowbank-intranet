@@ -4,7 +4,7 @@ This document outlines the configuration management strategy for the Crowbank In
 
 ## Overview
 
-The Crowbank Intranet application uses a centralized configuration management approach based on Flask's native configuration system, with a clear loading order and environment-specific settings.
+The Crowbank Intranet application uses a YAML-based configuration management approach with Flask's native configuration system, providing a clear loading order and environment-specific settings.
 
 ## Key Principles
 
@@ -18,84 +18,59 @@ The Crowbank Intranet application uses a centralized configuration management ap
 
 ### Configuration Loader
 
-A shared configuration loader module (`utils.config_loader.py`) is responsible for:
+A shared YAML configuration loader module (`app/utils/yaml_config.py`) is responsible for:
 - Detecting the environment
-- Loading base/default settings
+- Loading base/default settings from YAML files
 - Applying environment-specific overrides
-- Loading secrets
-- Returning a unified configuration dictionary
+- Loading secrets from separate YAML files
+- Returning both nested and flattened configuration dictionaries
 
 ```python
-# Example implementation in utils/config_loader.py
+# Example implementation in app/utils/yaml_config.py
 import os
-from dotenv import load_dotenv
+import yaml
 from typing import Dict, Any, Optional
 
 def load_config(env: Optional[str] = None) -> Dict[str, Any]:
     """
-    Load configuration from multiple sources in the following order:
-    1. Default config values
-    2. Environment-specific overrides
-    3. Secrets from environment variables or .env file
-    4. Command-line arguments (if applicable)
+    Load configuration from YAML files in the following order:
+    1. Default config values (config/yaml/default.yaml)
+    2. Environment-specific overrides (config/yaml/dev.yaml, etc.)
+    3. Secret config values (config/yaml/secret.yaml)
     
     Args:
         env: Optional environment name to override FLASK_ENV.
              Should be one of: 'dev', 'test', 'prod'
     
-    Returns a consolidated configuration dictionary.
+    Returns a dictionary with both nested and flattened configurations.
     """
-    config = {}
+    # Base config directory
+    config_dir = os.path.join(os.getcwd(), "config", "yaml")
     
-    # 1. Load base settings
-    from config.default import config as default_config
-    config.update(default_config)
-    
-    # 2. Determine environment
+    # 1. Determine environment
     flask_env = env or os.getenv("FLASK_ENV", "dev")
     
-    # Convert to short name format if full name was used
-    if flask_env == "development":
-        flask_env = "dev"
-    elif flask_env == "production":
-        flask_env = "prod"
-    elif flask_env == "testing":
-        flask_env = "test"
+    # 2. Load default config
+    default_config_path = os.path.join(config_dir, "default.yaml")
+    config = load_yaml_file(default_config_path)
     
-    # Store the environment in the config
-    config["ENV"] = flask_env
+    # 3. Load environment-specific config
+    env_config_path = os.path.join(config_dir, f"{flask_env}.yaml")
+    env_config = load_yaml_file(env_config_path)
+    config = deep_merge(env_config, config)
     
-    # 3. Load environment-specific settings
-    if flask_env == "prod":
-        from config.prod import config as env_config
-    elif flask_env == "test":
-        from config.test import config as env_config
-    else:  # dev is default
-        from config.dev import config as env_config
+    # 4. Load secret config (if exists)
+    secret_config_path = os.path.join(config_dir, "secret.yaml")
+    secret_config = load_yaml_file(secret_config_path)
+    config = deep_merge(secret_config, config)
     
-    config.update(env_config)
+    # 5. Create Flask-compatible flattened config
+    flask_config = flatten_dict(config)
     
-    # 4. Load secrets from environment variables or .env file
-    # For production, this could be skipped if using system environment variables
-    if flask_env != "prod":
-        # Only load .env file in non-production environments
-        dotenv_path = os.getenv("DOTENV_PATH", ".env")
-        if os.path.exists(dotenv_path):
-            load_dotenv(dotenv_path)
-    
-    # 5. Override with environment variables that match config keys
-    for key in list(config.keys()):
-        env_key = key.upper()  # Environment variables are typically uppercase
-        env_val = os.getenv(env_key)
-        if env_val is not None:
-            # Convert environment values to appropriate types if needed
-            config[key] = env_val
-    
-    # 6. Special handling for database configuration
-    if os.getenv("DATABASE_URL"):
-        config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
-    
-    return config
+    return {
+        "nested": config,      # Original nested structure
+        "flat": flask_config,  # Flattened for Flask compatibility
+    }
 ```
 
 ### Configuration Loading Order
@@ -105,16 +80,21 @@ def load_config(env: Optional[str] = None) -> Dict[str, Any]:
 In the Flask application factory:
 
 ```python
-# Example in app/__init__.py or app/app_factory.py
+# Example in app/__init__.py
 from flask import Flask
-from utils.config_loader import load_config
+from app.utils.yaml_config import load_config
 
 def create_app(test_config=None):
     app = Flask(__name__)
     
-    # Load configuration
+    # Load configuration from YAML files
     config = load_config()
-    app.config.from_mapping(config)
+    
+    # Apply the flattened config to Flask
+    app.config.from_mapping(config["flat"])
+    
+    # Make nested config available as well
+    app.config["CONFIG"] = config["nested"]
     
     # Override with test config if provided
     if test_config:
@@ -132,12 +112,15 @@ For scripts outside the Flask context:
 
 ```python
 # Example in a standalone script
-from utils.config_loader import load_config
+from app.utils.yaml_config import load_config
 
 config = load_config()
 
-# Use config directly
-database_url = config["SQLALCHEMY_DATABASE_URI"]
+# Use nested config for complex structures
+database_config = config["nested"]["database"]
+
+# Use flattened config for Flask-compatible keys
+database_url = config["flat"]["SQLALCHEMY_DATABASE_URI"]
 ```
 
 ### Environment Detection
@@ -190,51 +173,117 @@ database_url = config["SQLALCHEMY_DATABASE_URI"]
 
 ## Configuration Structure
 
-### Base Configuration (config/default.py)
+### Base Configuration (config/yaml/default.yaml)
 
 Contains non-sensitive defaults that apply across all environments:
 
-```python
-config = {
-    "APP_NAME": "Crowbank Intranet",
-    "ITEMS_PER_PAGE": 20,
-    "UPLOAD_FOLDER": "uploads",
-    "ALLOWED_EXTENSIONS": {"pdf", "png", "jpg", "jpeg"},
-    "MAX_CONTENT_LENGTH": 16 * 1024 * 1024,  # 16 MB
-}
+```yaml
+# Application settings
+app:
+  name: "Crowbank Intranet"
+  version: "0.1.0"
+
+# UI settings  
+ui:
+  items_per_page: 20
+  max_search_results: 100
+
+# File handling
+files:
+  upload_folder: "uploads"
+  allowed_extensions: ["pdf", "png", "jpg", "jpeg", "docx", "xlsx"]
+  max_content_length: 16777216  # 16 MB
+
+# Session settings
+session:
+  permanent_session_lifetime: 86400  # 24 hours
+  type: "filesystem"
 ```
 
 ### Environment-Specific Configuration
 
-**Development (config/dev.py)**:
-```python
-config = {
-    "DEBUG": True,
-    "TESTING": False,
-    "SQLALCHEMY_DATABASE_URI": "postgresql://crowbank:password@localhost/crowbank_dev",
-    "SQLALCHEMY_TRACK_MODIFICATIONS": True,
-}
+**Development (config/yaml/dev.yaml)**:
+```yaml
+# Flask settings
+flask:
+  debug: true
+  testing: false
+
+# Database settings (credentials in secret.yaml)
+database:
+  host: "192.168.0.201"
+  port: 54320
+  name: "crowbank"
+
+# SQLAlchemy settings
+sqlalchemy:
+  echo: true
+  track_modifications: true
+
+# Development-specific settings
+development:
+  send_file_max_age: 0
+  templates_auto_reload: true
 ```
 
-**Testing (config/test.py)**:
-```python
-config = {
-    "DEBUG": True,
-    "TESTING": True,
-    "SQLALCHEMY_DATABASE_URI": "postgresql://crowbank:password@localhost/crowbank_test",
-    "SQLALCHEMY_TRACK_MODIFICATIONS": False,
-    "WTF_CSRF_ENABLED": False,
-}
+**Testing (config/yaml/test.yaml)**:
+```yaml
+flask:
+  debug: true
+  testing: true
+
+database:
+  host: "localhost"
+  port: 5432
+  name: "crowbank_test"
+
+sqlalchemy:
+  track_modifications: false
+  
+# Disable CSRF for testing
+wtf:
+  csrf_enabled: false
 ```
 
-**Production (config/prod.py)**:
-```python
-config = {
-    "DEBUG": False,
-    "TESTING": False,
-    "SQLALCHEMY_TRACK_MODIFICATIONS": False,
-    # Database URL should come from environment variables in production
-}
+**Production (config/yaml/prod.yaml)**:
+```yaml
+flask:
+  debug: false
+  testing: false
+
+sqlalchemy:
+  track_modifications: false
+  echo: false
+
+# Production-specific settings
+production:
+  send_file_max_age: 31536000  # 1 year
+```
+
+### Secret Configuration (config/yaml/secret.yaml)
+
+Contains sensitive information (not committed to git):
+
+```yaml
+# Database credentials
+database:
+  user: "crowbank"
+  password: "your_secure_password"
+
+# Legacy database credentials  
+legacy_database:
+  username: "PA"
+  password: "legacy_password"
+
+# Cloud storage credentials
+cloud_storage:
+  access_key_id: "your_access_key"
+  secret_access_key: "your_secret_key"
+
+# Email credentials
+email:
+  username: "your_email@crowbank.co.uk"
+  password: "your_email_password"
 ```
 
 ## Alembic Integration
@@ -245,38 +294,38 @@ For database migrations with Alembic:
 # In migrations/env.py
 import os
 import sys
-from dotenv import load_dotenv
 
 # Add the application root directory to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-# Use the same configuration loader
-from utils.config_loader import load_config
+# Use the YAML configuration loader
+from app.utils.yaml_config import load_config
 
 config = load_config()
 
 # Use the database URL from the loaded configuration
 from alembic import context
 alembic_config = context.config
-alembic_config.set_main_option("sqlalchemy.url", config["SQLALCHEMY_DATABASE_URI"])
+alembic_config.set_main_option("sqlalchemy.url", config["flat"]["SQLALCHEMY_DATABASE_URI"])
 ```
 
-## Implementation Plan
+## Implementation Status
 
-1. Create the configuration directory and files:
-   - `config/default.py`
-   - `config/dev.py`
-   - `config/test.py`
-   - `config/prod.py`
+✅ **Completed**:
+- YAML configuration directory and files created
+- `app/utils/yaml_config.py` module implemented
+- Application initialization updated to use YAML configuration
+- Migration scripts updated to use YAML configuration
+- Documentation updated to reflect YAML approach
 
-2. Implement the `utils/config_loader.py` module
+📝 **Configuration Files**:
+- `config/yaml/default.yaml` - Base configuration
+- `config/yaml/dev.yaml` - Development overrides  
+- `config/yaml/test.yaml` - Testing overrides
+- `config/yaml/prod.yaml` - Production overrides
+- `config/yaml/secret.yaml` - Sensitive credentials (not in git)
 
-3. Update application initialization to use the new configuration loader
-
-4. Update standalone scripts to use the configuration loader
-
-5. Update Alembic configuration to use the loader
-
-6. Document the approach in the project README
-
-7. Add example `.env` file for development (`.env.example`) 
+🔧 **Usage**:
+- Flask app: Uses `app.utils.yaml_config.load_config()`
+- Migration scripts: Uses same loader for database connections
+- Environment detection: `FLASK_ENV` environment variable 
