@@ -51,7 +51,16 @@
       "Bash(git rebase:*)",
       "Bash(rg:*)",
       "Bash(ruff check:*)",
-      "Bash(ruff format:*)"
+      "Bash(ruff format:*)",
+      "mcp__ide__getDiagnostics",
+      "mcp__ide__executeCode",
+      "Bash(/home/crowbank/crowbank-intranet/venv/bin/mssql_mcp_server --help 2 >& 1)",
+      "Bash(MSSQL_CONNECTION_STRING=\"mssql+pyodbc://PA:petadmin@192.168.0.200\\SQLEXPRESS/crowbank?driver=ODBC+Driver+18+for+SQL+Server&Encrypt=yes&TrustServerCertificate=yes\" /home/crowbank/crowbank-intranet/venv/bin/mssql_mcp_server --help 2 >& 1)",
+      "Bash(MSSQL_USER=\"PA\" MSSQL_PASSWORD=\"petadmin\" MSSQL_SERVER=\"192.168.0.200\\SQLEXPRESS\" MSSQL_DATABASE=\"crowbank\" /home/crowbank/crowbank-intranet/venv/bin/mssql_mcp_server --help 2 >& 1)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:www.pulsemcp.com)",
+      "WebFetch(domain:apidog.com)",
+      "Bash(mv:*)"
     ],
     "deny": []
   }

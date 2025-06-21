@@ -6,10 +6,10 @@ This file provides context for Claude when working on the Crowbank Intranet proj
 
 Before making any changes, please read these essential documentation files:
 
-1. **Project Overview**: Read `/docs/canvases/README.md` for a high-level understanding of the project
-2. **Architecture**: Review `/docs/canvases/architecture_overview.md` for system architecture and design patterns
-3. **Development Guidelines**: Check `/docs/canvases/cursor_guidelines.md` for coding standards and best practices
-4. **Project Plan**: See `/docs/canvases/project_plan.md` for current roadmap and priorities
+1. **Project Overview**: Read `/docs/project-overview.md` for a comprehensive understanding of the project
+2. **Project Roadmap**: Review `/docs/project-roadmap.md` for detailed development phases and current priorities
+3. **Development Guidelines**: Check `/docs/development-guidelines.md` for coding standards and best practices
+4. **Data Model Design**: See `/docs/data-model-design.md` for database patterns and naming conventions
 5. **Configuration**: Review `/docs/configuration_management.md` for setup and config management
 6. **Git Policy**: Read `/docs/git-policy.md` for version control practices
 
@@ -50,6 +50,20 @@ The project is currently in **database migration phase**, moving data from a leg
 3. **Test migrations thoroughly** - data integrity is critical
 4. **Use the lookup system** for FK translations between legacy and new IDs
 5. **Respect the enum values** defined in the PostgreSQL schema
+
+## Git Workflow Guidelines
+
+**Commit Strategy**: When a logical set of changes appears to be complete (e.g., feature implementation, bug fix, documentation update, refactoring), **always suggest creating a commit** before starting unrelated tasks. This maintains clean project history and prevents work from being lost.
+
+**Commit Timing Indicators**:
+- Completed feature or functionality
+- Documentation updates or reorganization
+- Configuration changes
+- Bug fixes or error corrections
+- Before switching to different areas of the codebase
+- When requested by the user
+
+**Commit Process**: Use the established Git workflow with proper commit messages and co-authorship attribution as defined in the main instructions.
 
 ## Running Migrations
 

@@ -209,11 +209,8 @@ flask:
   debug: true
   testing: false
 
-# Database settings (credentials in secret.yaml)
-database:
-  host: "192.168.0.201"
-  port: 54320
-  name: "crowbank"
+# Database settings - now using Neon PostgreSQL
+# Connection details managed in secret.yaml
 
 # SQLAlchemy settings
 sqlalchemy:

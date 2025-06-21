@@ -47,21 +47,11 @@ def connect_to_new_db():
     
     # Get database configuration
     db = config['nested']['database']
-    user = db.get('user', 'crowbank')
-    # Use hardcoded password from config/dev.py
-    password = "ZhV8Pk521j1Z"  # Override from config file
-    host = db.get('host', '192.168.0.201')
-    port = db.get('port', 54320)
-    name = db.get('name', 'crowbank')
+    # Use Neon PostgreSQL connection from configuration
+    connection_string = config['nested']['database']['connection_string']
     
-    logger.info("Connecting to new PostgreSQL database...")
-    return psycopg.connect(
-        user=user,
-        password=password,
-        host=host,
-        port=port,
-        dbname=name
-    )
+    logger.info("Connecting to Neon PostgreSQL database...")
+    return psycopg.connect(connection_string)
 
 def get_vet_mapping(pg_conn):
     """Create a mapping from legacy vet IDs to new vet IDs."""

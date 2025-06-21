@@ -6,10 +6,7 @@ flask:
   testing: false
 
 # Database settings (credentials should be in secret.yaml)
-database:
-  host: "192.168.0.201"
-  port: 54320
-  name: "crowbank"
+# Using Neon PostgreSQL - connection details in secret.yaml
 
 # Legacy database settings (credentials moved to secret.yaml)
 legacy_database:

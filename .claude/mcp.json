@@ -3,6 +3,28 @@
     "Neon": {
       "command": "npx",
       "args": ["-y", "mcp-remote", "https://mcp.neon.tech/sse"]
+    },
+    "MSSQL": {
+      "command": "/home/crowbank/crowbank-intranet/venv/bin/mssql_mcp_server",
+      "args": [],
+      "env": {
+        "MSSQL_CONNECTION_STRING": "mssql+pyodbc://PA:petadmin@192.168.0.200\\SQLEXPRESS/crowbank?driver=ODBC+Driver+18+for+SQL+Server&Encrypt=yes&TrustServerCertificate=yes"
+      }
+    },
+    "GitHub": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": ""
+      }
+    },
+    "FileSystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/crowbank/crowbank-intranet"]
+    },
+    "Docker": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-docker"]
     }
   }
 }

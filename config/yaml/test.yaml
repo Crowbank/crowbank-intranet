@@ -4,14 +4,11 @@
 flask:
   debug: false
   testing: true
-  server_name: "192.168.0.201"
+  # server_name removed - using Neon for all environments
   preserve_context_on_exception: false
 
-# Database settings (test database)
-database:
-  host: "192.168.0.201"
-  port: 54320
-  name: "crowbank_test"
+# Database settings (test database) - using Neon PostgreSQL
+# Test database connection details in secret.yaml
 
 # SQLAlchemy settings
 sqlalchemy:

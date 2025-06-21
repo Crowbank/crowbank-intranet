@@ -6,7 +6,7 @@ This document describes the available MCPs configured for the Crowbank Intranet 
 
 ### 1. **PostgreSQL MCP** (`postgres`)
 - **Purpose**: Direct access to the main PostgreSQL database
-- **Connection**: `192.168.0.201:54320/crowbank`
+- **Connection**: Neon PostgreSQL cloud database
 - **Use Cases**:
   - Query migrated data to validate migration results
   - Execute database maintenance scripts

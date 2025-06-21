@@ -31,6 +31,24 @@
 - **Testing:** pytest for unit and integration testing; mypy for type checking; smoke tests for critical routes and functionality
 
 ## AI Integration Roadmap
+
+### Model Context Protocol (MCP) Integration Strategy
+- **Production MCP Servers**: Integration of specialized MCP servers for business-critical operations
+  - **Stripe MCP Server**: Automated payment processing, customer billing, subscription management, and refund handling for all boarding services
+  - **Email/SMS MCP Servers**: Automated customer communications, booking confirmations, pickup notifications, and emergency alerts
+  - **Calendar MCP Server**: Intelligent booking management, staff scheduling, and resource allocation
+  - **Document MCP Server**: Automated handling of pet health records, vaccination documents, and compliance files
+
+### Custom Crowbank MCP Server Development
+- **Dedicated Business Operations MCP**: Development of a custom MCP server specifically for Crowbank business logic
+  - **Booking Operations**: AI-driven creation, modification, and cancellation of pet boarding reservations
+  - **Customer Management**: Intelligent customer profile management, preference tracking, and service history analysis
+  - **Pet Management**: Automated pet record updates, health monitoring, and care requirement tracking
+  - **Staff Operations**: AI-assisted staff scheduling, task assignment, and workload optimization
+  - **Reporting & Analytics**: Intelligent business insights, occupancy forecasting, and revenue optimization
+  - **Integration Hub**: Seamless coordination between Stripe payments, customer communications, and operational workflows
+
+### AI-Powered Business Intelligence
 - Production-grade AI agents powered by structured MCP-style prompts
 - AI-driven vet consultation module to assist staff in identifying and managing pet health issues
 - Automated social media caption generation for pet photos
@@ -67,7 +85,7 @@
 - Planned MCP (Multi-Context Prompts) clearly defined for specific workflows and tasks within Cursor IDE
 
 ## Archiving and Project Documentation
-- Structured documentation clearly maintained within the project's `docs/canvases/` folder
+- Structured documentation clearly maintained within the project's `docs/` folder
 - Git version control providing comprehensive, trackable project history
 
 ## Future Development Considerations
