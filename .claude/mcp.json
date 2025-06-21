@@ -20,7 +20,7 @@
     },
     "FileSystem": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/crowbank/crowbank-intranet"]
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/crowbank"]
     },
     "Docker": {
       "command": "npx",

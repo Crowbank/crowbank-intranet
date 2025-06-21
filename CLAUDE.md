@@ -97,9 +97,53 @@ python -m migration.importer --tables table_name
 python -m migration.importer --tables table_name --force
 ```
 
+## Legacy System Access
+
+**Legacy Project Location**: `~/crowbank-flask`
+
+The legacy system (old PetAdmin-based Flask application) is located in `/home/crowbank/crowbank-flask`. This contains:
+- Original business logic and workflows
+- Legacy database views and stored procedures
+- Current production system architecture
+- Business rules and validation logic
+- User interface patterns and workflows
+
+**FileSystem MCP Configuration**: The FileSystem MCP server is configured to access the entire `/home/crowbank` directory, providing access to both:
+- `~/crowbank-intranet` (new system being developed)
+- `~/crowbank-flask` (legacy system for reference)
+
+**Legacy System Understanding**: When working on migration tasks, refer to the legacy system to understand:
+- How business processes currently work
+- Data relationships and constraints
+- User workflows and interface patterns
+- Business rules and validation logic
+- Integration points and external dependencies
+
+## MCP Server Configuration Status
+
+**Post-Restart Setup Required**: After Claude Code restart, the following MCP servers will be available:
+
+### Production-Ready MCP Servers
+- **Neon PostgreSQL**: Cloud database operations
+- **MSSQL**: Legacy database access (192.168.0.200\SQLEXPRESS)
+- **GitHub**: Repository management and operations
+- **FileSystem**: Full home directory access (`/home/crowbank`)
+- **Docker**: Container management
+
+### MCP Servers for Legacy System Installation
+The following MCP servers should be installed on the legacy system (`~/crowbank-flask`):
+- **GitHub MCP**: Repository management
+- **FileSystem MCP**: File operations
+- **Docker MCP**: Container management
+- **Email/SMS MCP**: Customer communications (when implemented)
+- **Calendar MCP**: Booking management (when implemented)
+
+**Note**: Do NOT install Neon MCP on legacy system - it uses different database infrastructure.
+
 ## Need Help?
 
 - Check the relevant documentation files in `/docs/`
 - Review existing migration patterns in `migration/importer.py`
 - Look at the model definitions in `app/models/` for schema understanding
 - Check enum definitions and constraints in migration files under `migrations/versions/`
+- **Reference legacy system** in `~/crowbank-flask` for business logic understanding
