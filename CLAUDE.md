@@ -140,6 +140,12 @@ The following MCP servers should be installed on the legacy system (`~/crowbank-
 
 **Note**: Do NOT install Neon MCP on legacy system - it uses different database infrastructure.
 
+**Legacy MCP Setup Status**: ✅ **COMPLETED**
+- Legacy MCP configuration created at `~/crowbank-flask/.claude/mcp.json`
+- FileSystem MCP configured for legacy project path
+- Setup script available at `scripts/setup_legacy_mcp.py`
+- Ready for Claude Code restart to activate all MCP servers
+
 ## Need Help?
 
 - Check the relevant documentation files in `/docs/`
