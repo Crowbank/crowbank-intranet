@@ -61,7 +61,8 @@
       "WebFetch(domain:www.pulsemcp.com)",
       "WebFetch(domain:apidog.com)",
       "Bash(mv:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(git checkout:*)"
     ],
     "deny": []
   }
