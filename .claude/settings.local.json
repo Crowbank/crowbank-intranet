@@ -60,7 +60,8 @@
       "WebFetch(domain:github.com)",
       "WebFetch(domain:www.pulsemcp.com)",
       "WebFetch(domain:apidog.com)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(git reset:*)"
     ],
     "deny": []
   }
