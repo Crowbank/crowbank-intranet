@@ -65,25 +65,25 @@ The project is currently in **database migration phase**, moving data from a leg
 
 **Commit Process**: Use the established Git workflow with proper commit messages and co-authorship attribution as defined in the main instructions.
 
-**Branch Management Strategy**: Before making ANY file changes, **always verify the current branch is appropriate** for the task at hand. Different types of work require different branches:
+**Branch Management Strategy**: Before making ANY file changes, **always verify the current branch is appropriate** for the task at hand. Different types of work require different branch categories:
 
-- `feature/database-migration` - Database migration scripts, data import/export, schema changes
-- `feature/mcp-integration` - MCP server configuration, AI tool integration  
-- `feature/documentation` - Documentation updates, project organization
-- `feature/ui-development` - Frontend components, templates, styling
-- `feature/infrastructure` - Docker, deployment, configuration management
-- `main`/`develop` - Only for releases and stable integration
+- **User Features** - Customer-facing functionality, business logic, UI components
+- **Development Infrastructure** - MCP servers, tooling, development environment setup
+- **Documentation** - Project documentation, guides, architectural decisions  
+- **Configuration** - Environment setup, deployment config, system configuration
+- **Database** - Schema changes, migrations, data operations
+- **Integration Branches** - For stable releases and cross-feature integration
 
 **Branch Verification Process**:
 1. **Check current branch** before starting any task
-2. **Assess task category** (migration, documentation, UI, infrastructure, etc.)
-3. **If branch doesn't match task**:
+2. **Assess task category** and determine appropriate branch type
+3. **If current branch doesn't match task category**:
    - Review existing branches with `git branch -a`
-   - Either checkout appropriate existing branch OR create new feature branch
+   - Either checkout appropriate existing branch OR create new branch with logical naming
    - Suggest branch strategy to user before proceeding
-4. **Complete workflow**: When task is finished, suggest commits, pushes, and potential merges to main development branch
+4. **Complete workflow**: When task is finished, suggest commits, pushes, and potential merges as appropriate
 
-**Never proceed with file changes on an inappropriate branch.** This maintains clean project history and logical feature separation.
+**Never proceed with file changes on an inappropriate branch.** This maintains clean project history and logical separation of work types.
 
 ## Running Migrations
 
