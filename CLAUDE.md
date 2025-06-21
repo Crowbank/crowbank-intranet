@@ -65,14 +65,13 @@ The project is currently in **database migration phase**, moving data from a leg
 
 **Commit Process**: Use the established Git workflow with proper commit messages and co-authorship attribution as defined in the main instructions.
 
-**Branch Management Strategy**: Before making ANY file changes, **always verify the current branch is appropriate** for the task at hand. Different types of work require different branch categories:
+**Branch Management Strategy**: Before making ANY file changes, **always verify the current branch is appropriate** for the task at hand. Use this branch organization system:
 
-- **User Features** - Customer-facing functionality, business logic, UI components
-- **Development Infrastructure** - MCP servers, tooling, development environment setup
-- **Documentation** - Project documentation, guides, architectural decisions  
-- **Configuration** - Environment setup, deployment config, system configuration
-- **Database** - Schema changes, migrations, data operations
-- **Integration Branches** - For stable releases and cross-feature integration
+- `feature/` - User-facing features (booking system, customer management, payment processing, UI components)
+- `dev/` - Development support (MCP servers, tooling, infrastructure, configuration, environment setup)
+- `docs/` - Documentation (project docs, guides, architectural decisions)
+- `ops/` - Operations and deployment (Docker, cloud deployment, CI/CD)
+- **Integration branches** (main/develop) - For stable releases and cross-feature integration
 
 **Branch Verification Process**:
 1. **Check current branch** before starting any task
