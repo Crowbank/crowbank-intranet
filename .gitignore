@@ -62,3 +62,5 @@ config/yaml/secret.yaml
 # Temporary scripts
 scripts/temp/
 node_modules/
+# MCP Environment files with secrets
+.env.mcp
