@@ -62,7 +62,11 @@
       "WebFetch(domain:apidog.com)",
       "Bash(mv:*)",
       "Bash(git reset:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(cp:*)",
+      "Bash(docker:*)",
+      "Bash(systemctl:*)",
+      "Bash(/home/crowbank/crowbank-intranet/venv/bin/mssql_mcp_server --help)"
     ],
     "deny": []
   }
